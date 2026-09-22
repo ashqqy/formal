@@ -8,7 +8,7 @@ FetchContent_MakeAvailable(googletest)
 add_executable(formal_tests lexer_test.cpp)
 target_link_libraries(
     formal_tests
-    PRIVATE formal GTest::gtest_main formal_coverage
+    PRIVATE formal GTest::gtest_main formal_coverage formal_warnings
 )
 
 include(GoogleTest)

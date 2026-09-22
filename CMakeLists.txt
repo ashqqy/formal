@@ -20,6 +20,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include(cmake/coverage.cmake)
+include(cmake/warnings.cmake)
 
 add_subdirectory(src)
 
