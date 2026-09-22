@@ -12,6 +12,11 @@
       "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug", "FORMAL_WERROR": "ON" }
     },
     {
+      "name": "sanitizers",
+      "inherits": "debug",
+      "cacheVariables": { "FORMAL_SANITIZE": "ON" }
+    },
+    {
       "name": "release",
       "inherits": "base",
       "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
@@ -24,9 +29,14 @@
   ],
   "buildPresets": [
     { "name": "debug", "configurePreset": "debug" },
+    { "name": "sanitizers", "configurePreset": "sanitizers" },
     { "name": "release", "configurePreset": "release" },
     { "name": "coverage", "configurePreset": "coverage" },
-    { "name": "coverage-report", "configurePreset": "coverage", "targets": ["coverage"] }
+    {
+      "name": "coverage-report",
+      "configurePreset": "coverage",
+      "targets": ["coverage"]
+    }
   ],
   "testPresets": [
     {
@@ -35,6 +45,12 @@
       "output": { "outputOnFailure": true }
     },
     { "name": "debug", "inherits": "base", "configurePreset": "debug" },
+    {
+      "name": "sanitizers",
+      "inherits": "base",
+      "configurePreset": "sanitizers",
+      "environment": { "UBSAN_OPTIONS": "print_stacktrace=1" }
+    },
     { "name": "release", "inherits": "base", "configurePreset": "release" },
     { "name": "coverage", "inherits": "base", "configurePreset": "coverage" }
   ],
@@ -45,6 +61,14 @@
         { "type": "configure", "name": "debug" },
         { "type": "build", "name": "debug" },
         { "type": "test", "name": "debug" }
+      ]
+    },
+    {
+      "name": "sanitizers",
+      "steps": [
+        { "type": "configure", "name": "sanitizers" },
+        { "type": "build", "name": "sanitizers" },
+        { "type": "test", "name": "sanitizers" }
       ]
     },
     {

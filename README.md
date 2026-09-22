@@ -11,7 +11,7 @@
 
 ## Сборка и тесты
 
-Проект собирается через CMake-пресеты: `debug`, `release`, `coverage`.
+Проект собирается через CMake-пресеты: `debug`, `release`, `sanitizers`, `coverage`.
 Компилятор задаётся через `CXX` (без него CMake может выбрать другой, например clang):
 
 ```sh
@@ -30,6 +30,14 @@ ctest --preset debug          # тесты
 ```
 
 Для релизной сборки замените `debug` на `release`.
+
+## Санитайзеры
+
+Debug-сборка с AddressSanitizer и UBSan:
+
+```sh
+CXX=g++ cmake --workflow --preset sanitizers
+```
 
 ## Покрытие
 

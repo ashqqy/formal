@@ -21,6 +21,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include(cmake/coverage.cmake)
 include(cmake/warnings.cmake)
+include(cmake/sanitizers.cmake)
 
 add_subdirectory(src)
 
