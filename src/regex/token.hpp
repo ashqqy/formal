@@ -1,11 +1,11 @@
 #pragma once
 
-#include <cctype>
 #include <cstdint>
 #include <format>
 #include <ostream>
 
 #include "regex/position.hpp"
+#include "util/ascii.hpp"
 #include "util/enum_name.hpp"
 #include "util/symbol.hpp"
 
@@ -48,7 +48,7 @@ class Token {
 inline std::ostream& operator<<(std::ostream& os, const Token& token) {
     os << token.type();
     os << " '";
-    if (std::isprint(token.symbol()) != 0) {
+    if (is_print(token.symbol())) {
         os << static_cast<char>(token.symbol());
     } else {
         os << std::format("\\x{:02x}", token.symbol());
