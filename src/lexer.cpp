@@ -4,18 +4,20 @@
 
 #include "error.hpp"
 #include "position.hpp"
+#include "symbol.hpp"
+#include "token.hpp"
 
 namespace regex {
 
 Token Lexer::next() {
-    while (!eof() && std::isspace(static_cast<unsigned char>(peek())) != 0) {
+    while (!eof() && std::isspace(peek()) != 0) {
         advance();
     }
 
     if (eof()) { return {TokenType::End, '\0', cursor_}; }
 
     Position start = cursor_;
-    char c = advance();
+    Symbol c = advance();
 
     switch (c) {
         case '+':
@@ -32,7 +34,7 @@ Token Lexer::next() {
             return {TokenType::Epsilon, c, start};
         case '\\': {
             if (eof()) { throw SyntaxError("Dangling backslash", start); }
-            char d = advance();
+            Symbol d = advance();
             return {TokenType::Letter, d, start};
         }
         default:

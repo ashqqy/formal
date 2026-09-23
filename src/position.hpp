@@ -3,6 +3,8 @@
 #include <cstddef>
 #include <ostream>
 
+#include "symbol.hpp"
+
 namespace regex {
 
 struct Position {
@@ -12,7 +14,7 @@ struct Position {
 
     bool operator==(const Position&) const = default;
 
-    void advance(char c) noexcept {
+    void advance(Symbol c) noexcept {
         ++offset;
         if (c == '\n') {
             ++line;
