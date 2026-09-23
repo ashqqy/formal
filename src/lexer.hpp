@@ -12,18 +12,19 @@ namespace regex {
 
 class Lexer {
   public:
-    explicit Lexer(std::string input) : input_(std::move(input)) {}
+    constexpr explicit Lexer(std::string input) noexcept
+        : input_(std::move(input)) {}
 
-    Token next();
+    [[nodiscard]] Token next();
 
   private:
-    [[nodiscard]] bool eof() const noexcept {
+    [[nodiscard]] constexpr bool eof() const noexcept {
         return cursor_.offset >= input_.size();
     }
-    [[nodiscard]] Symbol peek() const noexcept {
+    [[nodiscard]] constexpr Symbol peek() const noexcept {
         return static_cast<Symbol>(input_[cursor_.offset]);
     }
-    Symbol advance() noexcept {
+    constexpr Symbol advance() noexcept {
         Symbol symbol = peek();
         cursor_.advance(symbol);
         return symbol;

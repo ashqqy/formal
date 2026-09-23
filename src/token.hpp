@@ -28,14 +28,16 @@ inline std::ostream& operator<<(std::ostream& os, TokenType type) {
 
 class Token {
   public:
-    Token(TokenType type, Symbol symbol, Position position)
+    constexpr Token(TokenType type, Symbol symbol, Position position) noexcept
         : type_(type), symbol_(symbol), position_(position) {}
 
     bool operator==(const Token&) const = default;
 
-    [[nodiscard]] TokenType type() const noexcept { return type_; }
-    [[nodiscard]] Symbol symbol() const noexcept { return symbol_; }
-    [[nodiscard]] Position position() const noexcept { return position_; }
+    [[nodiscard]] constexpr TokenType type() const noexcept { return type_; }
+    [[nodiscard]] constexpr Symbol symbol() const noexcept { return symbol_; }
+    [[nodiscard]] constexpr Position position() const noexcept {
+        return position_;
+    }
 
   private:
     TokenType type_;
@@ -47,7 +49,7 @@ inline std::ostream& operator<<(std::ostream& os, const Token& token) {
     os << token.type();
     os << " '";
     if (std::isprint(token.symbol()) != 0) {
-        os << token.symbol();
+        os << static_cast<char>(token.symbol());
     } else {
         os << std::format("\\x{:02x}", token.symbol());
     }

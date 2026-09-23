@@ -14,7 +14,7 @@ struct Position {
 
     bool operator==(const Position&) const = default;
 
-    void advance(Symbol c) noexcept {
+    constexpr void advance(Symbol c) noexcept {
         ++offset;
         if (c == '\n') {
             ++line;
