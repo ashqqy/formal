@@ -3,7 +3,7 @@
 ## Требования
 
 - **g++ 16+** — проект использует статическую рефлексию C++26 (`-std=c++26`), которая есть только в GCC 16 и новее.
-- **gcov той же версии**, что и g++, плюс `gcovr` — нужны только для отчёта о покрытии.
+- **gcovr** — нужен для отчёта о покрытии (`gcov` берётся рядом с компилятором).
 - CMake 3.25+.
 - GoogleTest скачивается автоматически при конфигурации (`FetchContent`).
 
@@ -45,12 +45,10 @@ CXX=g++ cmake --workflow --preset sanitizers
 CXX=g++ cmake --workflow --preset coverage
 ```
 
-HTML-отчёт появится в `build/coverage/coverage/index.html`.
-Версия `gcov` должна совпадать с версией `g++`, иначе `gcovr` не сможет прочитать данные покрытия.
-Если `gcov` по умолчанию другой версии, укажите его через `GCOV`:
+HTML-отчёт:
 
 ```sh
-CXX=g++-16 GCOV=gcov-16 cmake --workflow --preset coverage
+xdg-open build/coverage/coverage/index.html
 ```
 
 > `CXX` учитывается только при первой конфигурации. Если компилятор был выбран
