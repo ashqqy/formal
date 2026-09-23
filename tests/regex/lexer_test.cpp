@@ -117,6 +117,7 @@ TEST(LexerEscape, DanglingBackslashThrows) {
         FAIL() << "expected a SyntaxError";
     } catch (const SyntaxError& error) {
         EXPECT_EQ(error.position(), at(1, 2, 1));
+        EXPECT_STREQ(error.what(), "Dangling backslash");
     }
 }
 

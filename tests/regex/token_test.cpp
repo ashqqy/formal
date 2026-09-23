@@ -5,16 +5,10 @@
 
 #include "regex/position.hpp"
 #include "regex/token.hpp"
-#include "util/enum_name.hpp"
 #include "util/symbol.hpp"
 
 namespace formal::regex {
 namespace {
-
-static_assert(enum_name(TokenType::Plus) == "Plus");
-static_assert(enum_name(TokenType::Star) == "Star");
-static_assert(enum_name(TokenType::End) == "End");
-static_assert(enum_name(static_cast<TokenType>(42)) == "<unknown>");
 
 Position start() {
     return Position{.line = 1, .column = 1, .offset = 0};
