@@ -15,7 +15,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googletest)
 
-add_executable(formal_tests lexer_test.cpp token_test.cpp)
+add_executable(formal_tests regex/lexer_test.cpp regex/token_test.cpp)
 target_link_libraries(
     formal_tests
     PRIVATE formal GTest::gtest_main formal_coverage formal_warnings

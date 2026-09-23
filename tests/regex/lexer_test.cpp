@@ -5,14 +5,14 @@
 
 #include <gtest/gtest.h>
 
-#include "enum_name.hpp"
-#include "error.hpp"
-#include "lexer.hpp"
-#include "position.hpp"
-#include "symbol.hpp"
-#include "token.hpp"
+#include "regex/error.hpp"
+#include "regex/lexer.hpp"
+#include "regex/position.hpp"
+#include "regex/token.hpp"
+#include "util/enum_name.hpp"
+#include "util/symbol.hpp"
 
-namespace regex {
+namespace formal::regex {
 namespace {
 
 // Collects every token, End included, so that a test can compare whole inputs.
@@ -145,4 +145,4 @@ TEST(Lexer, KeepsReturningEndPastTheInput) {
 }
 
 } // namespace
-} // namespace regex
+} // namespace formal::regex

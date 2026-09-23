@@ -3,12 +3,12 @@
 
 #include <gtest/gtest.h>
 
-#include "enum_name.hpp"
-#include "position.hpp"
-#include "symbol.hpp"
-#include "token.hpp"
+#include "regex/position.hpp"
+#include "regex/token.hpp"
+#include "util/enum_name.hpp"
+#include "util/symbol.hpp"
 
-namespace regex {
+namespace formal::regex {
 namespace {
 
 static_assert(enum_name(TokenType::Plus) == "Plus");
@@ -70,4 +70,4 @@ TEST(TokenPrint, GoogleTestUsesTheSameOutput) {
 }
 
 } // namespace
-} // namespace regex
+} // namespace formal::regex

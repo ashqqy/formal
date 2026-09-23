@@ -1,7 +1,7 @@
 #pragma once
 
-namespace regex {
+namespace formal {
 
 using Symbol = unsigned char;
 
-} // namespace regex
+} // namespace formal

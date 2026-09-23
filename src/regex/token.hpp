@@ -5,11 +5,11 @@
 #include <format>
 #include <ostream>
 
-#include "enum_name.hpp"
-#include "position.hpp"
-#include "symbol.hpp"
+#include "regex/position.hpp"
+#include "util/enum_name.hpp"
+#include "util/symbol.hpp"
 
-namespace regex {
+namespace formal::regex {
 
 enum class TokenType : std::uint8_t {
     Plus,
@@ -57,4 +57,4 @@ inline std::ostream& operator<<(std::ostream& os, const Token& token) {
     return os << " at " << token.position();
 }
 
-} // namespace regex
+} // namespace formal::regex

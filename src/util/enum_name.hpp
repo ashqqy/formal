@@ -4,7 +4,7 @@
 #include <string_view>
 #include <type_traits>
 
-namespace regex {
+namespace formal {
 
 template <typename E>
     requires std::is_enum_v<E>
@@ -16,4 +16,4 @@ constexpr std::string_view enum_name(E value) {
     return "<unknown>";
 }
 
-} // namespace regex
+} // namespace formal

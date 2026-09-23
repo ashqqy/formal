@@ -3,9 +3,9 @@
 #include <cstddef>
 #include <ostream>
 
-#include "symbol.hpp"
+#include "util/symbol.hpp"
 
-namespace regex {
+namespace formal::regex {
 
 struct Position {
     std::size_t line = 1;
@@ -29,4 +29,4 @@ inline std::ostream& operator<<(std::ostream& os, const Position& p) {
     return os << p.line << ":" << p.column << " (offset " << p.offset << ')';
 }
 
-} // namespace regex
+} // namespace formal::regex

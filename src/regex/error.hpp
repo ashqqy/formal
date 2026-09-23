@@ -3,9 +3,9 @@
 #include <stdexcept>
 #include <string>
 
-#include "position.hpp"
+#include "regex/position.hpp"
 
-namespace regex {
+namespace formal::regex {
 
 class SyntaxError : public std::runtime_error {
   public:
@@ -18,4 +18,4 @@ class SyntaxError : public std::runtime_error {
     Position position_;
 };
 
-} // namespace regex
+} // namespace formal::regex

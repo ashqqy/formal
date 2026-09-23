@@ -3,12 +3,12 @@
 #include <string>
 #include <utility>
 
-#include "error.hpp" // IWYU pragma: export
-#include "position.hpp"
-#include "symbol.hpp"
-#include "token.hpp"
+#include "regex/error.hpp" // IWYU pragma: export
+#include "regex/position.hpp"
+#include "regex/token.hpp"
+#include "util/symbol.hpp"
 
-namespace regex {
+namespace formal::regex {
 
 class Lexer {
   public:
@@ -34,4 +34,4 @@ class Lexer {
     Position cursor_;
 };
 
-} // namespace regex
+} // namespace formal::regex

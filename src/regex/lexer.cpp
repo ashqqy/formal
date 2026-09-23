@@ -1,13 +1,13 @@
-#include "lexer.hpp"
+#include "regex/lexer.hpp"
 
 #include <cctype>
 
-#include "error.hpp"
-#include "position.hpp"
-#include "symbol.hpp"
-#include "token.hpp"
+#include "regex/error.hpp"
+#include "regex/position.hpp"
+#include "regex/token.hpp"
+#include "util/symbol.hpp"
 
-namespace regex {
+namespace formal::regex {
 
 Token Lexer::next() {
     while (!eof() && std::isspace(peek()) != 0) {
@@ -42,4 +42,4 @@ Token Lexer::next() {
     }
 }
 
-} // namespace regex
+} // namespace formal::regex
