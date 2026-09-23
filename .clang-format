@@ -11,6 +11,7 @@ ColumnLimit: 80
 
 BreakTemplateDeclarations: Yes
 
+ShortNamespaceLines: 0
 AllowShortBlocksOnASingleLine: Always
 AllowShortIfStatementsOnASingleLine: WithoutElse
 AllowShortFunctionsOnASingleLine: InlineOnly
