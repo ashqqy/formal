@@ -1,20 +1,26 @@
 #pragma once
 
-#include <stdexcept>
-#include <string>
+#include <exception>
 
 #include "regex/position.hpp"
 
 namespace formal::regex {
 
-class SyntaxError : public std::runtime_error {
+class SyntaxError : public std::exception {
   public:
-    SyntaxError(const std::string& message, Position position)
-        : std::runtime_error(message), position_(position) {}
+    constexpr SyntaxError(const char* message, Position position) noexcept
+        : message_(message), position_(position) {}
 
-    [[nodiscard]] Position position() const noexcept { return position_; }
+    [[nodiscard]] const char* what() const noexcept override {
+        return message_;
+    }
+
+    [[nodiscard]] constexpr Position position() const noexcept {
+        return position_;
+    }
 
   private:
+    const char* message_;
     Position position_;
 };
 
