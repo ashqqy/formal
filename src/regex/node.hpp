@@ -1,10 +1,10 @@
 #pragma once
 
-#include "regex/visitor.hpp"
-#include "util/symbol.hpp"
-
 #include <memory>
 #include <utility>
+
+#include "regex/visitor.hpp"
+#include "util/symbol.hpp"
 
 namespace formal::regex {
 
