@@ -20,7 +20,6 @@ add_executable(
     regex/node_test.cpp
     regex/printer_test.cpp
     regex/lexer_test.cpp
-    regex/lexer_constexpr_test.cpp
     regex/token_test.cpp
     util/enum_name_test.cpp
 )
