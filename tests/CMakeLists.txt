@@ -17,6 +17,7 @@ FetchContent_MakeAvailable(googletest)
 
 add_executable(
     formal_tests
+    regex/node_test.cpp
     regex/lexer_test.cpp
     regex/lexer_constexpr_test.cpp
     regex/token_test.cpp
