@@ -27,18 +27,14 @@ class Lexer {
         Symbol c = advance();
 
         switch (c) {
-            case '+':
-                return {TokenType::Plus, c, start};
-            case '.':
-                return {TokenType::Dot, c, start};
+            case '|':
+                return {TokenType::Pipe, c, start};
             case '*':
                 return {TokenType::Star, c, start};
             case '(':
                 return {TokenType::Lparen, c, start};
             case ')':
                 return {TokenType::Rparen, c, start};
-            case '1':
-                return {TokenType::Epsilon, c, start};
             case '\\': {
                 if (eof()) { throw SyntaxError("Dangling backslash", start); }
                 Symbol d = advance();

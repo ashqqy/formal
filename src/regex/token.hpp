@@ -12,12 +12,10 @@
 namespace formal::regex {
 
 enum class TokenType : std::uint8_t {
-    Plus,
-    Dot,
+    Pipe,
     Star,
     Lparen,
     Rparen,
-    Epsilon,
     Letter,
     End,
 };

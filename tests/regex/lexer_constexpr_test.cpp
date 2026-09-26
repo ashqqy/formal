@@ -43,17 +43,17 @@ constexpr Position position_of_dangling_backslash(std::string input) {
     return Position{.line = 0, .column = 0, .offset = 0};
 }
 
-static_assert(token_count("a*(b+1)") == 8);
-static_assert(type_at("a*(b+1)", 0) == TokenType::Letter);
-static_assert(type_at("a*(b+1)", 1) == TokenType::Star);
-static_assert(type_at("a*(b+1)", 2) == TokenType::Lparen);
-static_assert(type_at("a*(b+1)", 3) == TokenType::Letter);
-static_assert(type_at("a*(b+1)", 4) == TokenType::Plus);
-static_assert(type_at("a*(b+1)", 5) == TokenType::Epsilon);
-static_assert(type_at("a*(b+1)", 6) == TokenType::Rparen);
-static_assert(type_at("a*(b+1)", 7) == TokenType::End);
+static_assert(token_count("a*(b|c)") == 8);
+static_assert(type_at("a*(b|c)", 0) == TokenType::Letter);
+static_assert(type_at("a*(b|c)", 1) == TokenType::Star);
+static_assert(type_at("a*(b|c)", 2) == TokenType::Lparen);
+static_assert(type_at("a*(b|c)", 3) == TokenType::Letter);
+static_assert(type_at("a*(b|c)", 4) == TokenType::Pipe);
+static_assert(type_at("a*(b|c)", 5) == TokenType::Letter);
+static_assert(type_at("a*(b|c)", 6) == TokenType::Rparen);
+static_assert(type_at("a*(b|c)", 7) == TokenType::End);
 
-static_assert(token_at("a*(b+1)", 3) ==
+static_assert(token_at("a*(b|c)", 3) ==
               Token(TokenType::Letter, 'b',
                     Position{.line = 1, .column = 4, .offset = 3}));
 
@@ -70,8 +70,8 @@ static_assert(position_of_dangling_backslash("a\\") ==
 
 // The same checks at run time, so that they also show up in coverage.
 TEST(LexerConstexpr, MatchesRuntimeLexing) {
-    EXPECT_EQ(token_count("a*(b+1)"), 8U);
-    EXPECT_EQ(type_at("a*(b+1)", 1), TokenType::Star);
+    EXPECT_EQ(token_count("a*(b|c)"), 8U);
+    EXPECT_EQ(type_at("a*(b|c)", 1), TokenType::Star);
     EXPECT_EQ(token_at("\\*", 0),
               Token(TokenType::Letter, '*',
                     Position{.line = 1, .column = 1, .offset = 0}));

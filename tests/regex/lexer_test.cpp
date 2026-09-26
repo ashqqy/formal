@@ -44,10 +44,14 @@ TEST(Lexer, LettersKeepTheirSymbolsAndPositions) {
     EXPECT_EQ(tokens[2].type(), TokenType::End);
 }
 
-TEST(Lexer, DigitOtherThanOneIsALetter) {
-    const std::vector<Token> tokens = tokenize("0");
-    ASSERT_EQ(tokens.size(), 2U);
+TEST(Lexer, NonOperatorsAreLetters) {
+    const std::vector<Token> tokens = tokenize("01.+?");
+    ASSERT_EQ(tokens.size(), 6U);
     EXPECT_EQ(tokens[0], Token(TokenType::Letter, '0', at(1, 1, 0)));
+    EXPECT_EQ(tokens[1], Token(TokenType::Letter, '1', at(1, 2, 1)));
+    EXPECT_EQ(tokens[2], Token(TokenType::Letter, '.', at(1, 3, 2)));
+    EXPECT_EQ(tokens[3], Token(TokenType::Letter, '+', at(1, 4, 3)));
+    EXPECT_EQ(tokens[4], Token(TokenType::Letter, '?', at(1, 5, 4)));
 }
 
 struct OperatorCase {
@@ -69,12 +73,10 @@ TEST_P(LexerOperator, HasItsOwnType) {
 
 INSTANTIATE_TEST_SUITE_P(
     Operators, LexerOperator,
-    testing::Values(OperatorCase{'+', TokenType::Plus},
-                    OperatorCase{'.', TokenType::Dot},
+    testing::Values(OperatorCase{'|', TokenType::Pipe},
                     OperatorCase{'*', TokenType::Star},
                     OperatorCase{'(', TokenType::Lparen},
-                    OperatorCase{')', TokenType::Rparen},
-                    OperatorCase{'1', TokenType::Epsilon}),
+                    OperatorCase{')', TokenType::Rparen}),
     [](const testing::TestParamInfo<OperatorCase>& test_case) {
         return std::string(enum_name(test_case.param.type));
     });
@@ -86,10 +88,10 @@ TEST(LexerEscape, TurnsAnOperatorIntoALetter) {
     EXPECT_EQ(tokens[0], Token(TokenType::Letter, '*', at(1, 1, 0)));
 }
 
-TEST(LexerEscape, TurnsEpsilonIntoALetter) {
-    const std::vector<Token> tokens = tokenize("\\1");
+TEST(LexerEscape, TurnsAPipeIntoALetter) {
+    const std::vector<Token> tokens = tokenize("\\|");
     ASSERT_EQ(tokens.size(), 2U);
-    EXPECT_EQ(tokens[0], Token(TokenType::Letter, '1', at(1, 1, 0)));
+    EXPECT_EQ(tokens[0], Token(TokenType::Letter, '|', at(1, 1, 0)));
 }
 
 TEST(LexerEscape, TurnsABackslashIntoALetter) {
