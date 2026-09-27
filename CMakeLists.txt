@@ -31,6 +31,7 @@ include(cmake/warnings.cmake)
 include(cmake/sanitizers.cmake)
 
 add_subdirectory(src)
+add_subdirectory(examples)
 
 enable_testing()
 add_subdirectory(tests)
