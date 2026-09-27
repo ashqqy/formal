@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <string>
 
 #include <gtest/gtest.h>
@@ -16,14 +17,12 @@ class Counter final : public Visitor {
 
     constexpr void visit(const ConcatNode& node) override {
         ++concats;
-        node.left().accept(*this);
-        node.right().accept(*this);
+        visit_children(node);
     }
 
     constexpr void visit(const UnionNode& node) override {
         ++unions;
-        node.left().accept(*this);
-        node.right().accept(*this);
+        visit_children(node);
     }
 
     constexpr void visit(const StarNode& node) override {
@@ -31,6 +30,15 @@ class Counter final : public Visitor {
         node.child().accept(*this);
     }
 
+  private:
+    template <class N>
+    constexpr void visit_children(const N& node) {
+        for (std::size_t i = 0; i < node.size(); ++i) {
+            node.child(i).accept(*this);
+        }
+    }
+
+  public:
     int symbols = 0;
     int epsilons = 0;
     int concats = 0;
@@ -43,22 +51,29 @@ class SymbolCollector final : public Visitor {
     constexpr void visit(const SymbolNode& node) override {
         out += to_char(node.symbol());
     }
-    constexpr void visit(const EpsilonNode&) override { out += '@'; }
+    constexpr void visit(const EpsilonNode& /*unused*/) override { out += '@'; }
 
     constexpr void visit(const ConcatNode& node) override {
-        node.left().accept(*this);
-        node.right().accept(*this);
+        visit_children(node);
     }
 
     constexpr void visit(const UnionNode& node) override {
-        node.left().accept(*this);
-        node.right().accept(*this);
+        visit_children(node);
     }
 
     constexpr void visit(const StarNode& node) override {
         node.child().accept(*this);
     }
 
+  private:
+    template <class N>
+    constexpr void visit_children(const N& node) {
+        for (std::size_t i = 0; i < node.size(); ++i) {
+            node.child(i).accept(*this);
+        }
+    }
+
+  public:
     std::string out;
 };
 
@@ -105,6 +120,48 @@ TEST(Node, StarKeepsItsChild) {
 TEST(Node, EpsilonHasNothingToVisit) {
     const NodePtr tree = make_epsilon();
     EXPECT_EQ(collect(*tree), "@");
+}
+
+TEST(Node, ConcatOfThreeIsFlat) {
+    const NodePtr tree =
+        make_concat(make_symbol('a'), make_symbol('b'), make_symbol('c'));
+
+    Counter counter;
+    tree->accept(counter);
+
+    EXPECT_EQ(counter.concats, 1);
+    EXPECT_EQ(counter.symbols, 3);
+    EXPECT_EQ(collect(*tree), "abc");
+}
+
+TEST(Node, UnionOfThreeIsFlat) {
+    const NodePtr tree =
+        make_union(make_symbol('a'), make_symbol('b'), make_symbol('c'));
+
+    Counter counter;
+    tree->accept(counter);
+
+    EXPECT_EQ(counter.unions, 1);
+    EXPECT_EQ(counter.symbols, 3);
+}
+
+TEST(Node, ConcatOfNothingIsEpsilon) {
+    Counter counter;
+    make_concat()->accept(counter);
+    EXPECT_EQ(counter.epsilons, 1);
+    EXPECT_EQ(counter.concats, 0);
+}
+
+TEST(Node, ASingleChildIsNotWrapped) {
+    Counter concat_counter;
+    make_concat(make_symbol('a'))->accept(concat_counter);
+    EXPECT_EQ(concat_counter.symbols, 1);
+    EXPECT_EQ(concat_counter.concats, 0);
+
+    Counter union_counter;
+    make_union(make_symbol('a'))->accept(union_counter);
+    EXPECT_EQ(union_counter.symbols, 1);
+    EXPECT_EQ(union_counter.unions, 0);
 }
 
 constexpr bool visits_a_tree_at_compile_time() {

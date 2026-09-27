@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <ostream>
 #include <string>
@@ -24,16 +25,18 @@ class Printer final : public Visitor {
     constexpr void visit(const ConcatNode& node) override {
         const bool needs_parens = Precedence::Concat < parent_precedence_;
         if (needs_parens) { out_ += '('; }
-        print_child(node.left(), Precedence::Concat);
-        print_child(node.right(), Precedence::Concat);
+        for (std::size_t i = 0; i < node.size(); ++i) {
+            print_child(node.child(i), Precedence::Concat);
+        }
         if (needs_parens) { out_ += ')'; }
     }
     constexpr void visit(const UnionNode& node) override {
         const bool needs_parens = Precedence::Union < parent_precedence_;
         if (needs_parens) { out_ += '('; }
-        print_child(node.left(), Precedence::Union);
-        out_ += '|';
-        print_child(node.right(), Precedence::Union);
+        for (std::size_t i = 0; i < node.size(); ++i) {
+            if (i != 0) { out_ += '|'; }
+            print_child(node.child(i), Precedence::Union);
+        }
         if (needs_parens) { out_ += ')'; }
     }
     constexpr void visit(const StarNode& node) override {
