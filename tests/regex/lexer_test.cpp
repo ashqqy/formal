@@ -138,6 +138,40 @@ TEST(LexerWhitespace, NewlineStartsANewLine) {
     EXPECT_EQ(tokens[1], Token(TokenType::Letter, 'b', at(2, 1, 2)));
 }
 
+TEST(LexerPeek, DoesNotConsume) {
+    Lexer lexer("ab");
+
+    const Token first = lexer.peek();
+    EXPECT_EQ(lexer.peek(), first);
+    EXPECT_EQ(lexer.next(), first);
+    EXPECT_EQ(lexer.peek(), Token(TokenType::Letter, 'b', at(1, 2, 1)));
+}
+
+TEST(LexerPeek, SkipsWhitespaceLikeNext) {
+    Lexer lexer(" \t a");
+    EXPECT_EQ(lexer.peek(), Token(TokenType::Letter, 'a', at(1, 4, 3)));
+    EXPECT_EQ(lexer.next(), lexer.peek());
+}
+
+TEST(LexerPeek, KeepsReturningEndPastTheInput) {
+    Lexer lexer("");
+    const Token end = Token(TokenType::End, '\0', at(1, 1, 0));
+    EXPECT_EQ(lexer.peek(), end);
+    EXPECT_EQ(lexer.next(), end);
+    EXPECT_EQ(lexer.peek(), end);
+}
+
+TEST(LexerPeek, ReportsADanglingBackslash) {
+    Lexer lexer("a\\");
+    EXPECT_EQ(lexer.next().type(), TokenType::Letter);
+    try {
+        (void)lexer.peek();
+        FAIL() << "expected a SyntaxError";
+    } catch (const SyntaxError& error) {
+        EXPECT_EQ(error.position(), at(1, 2, 1));
+    }
+}
+
 TEST(Lexer, KeepsReturningEndPastTheInput) {
     Lexer lexer("a");
     EXPECT_EQ(lexer.next().type(), TokenType::Letter);
@@ -186,6 +220,15 @@ static_assert(token_at("\\*", 0) ==
 static_assert(token_at(" a\nb", 1) ==
               Token(TokenType::Letter, 'b',
                     Position{.line = 2, .column = 1, .offset = 3}));
+
+constexpr bool peek_agrees_with_next(std::string input) {
+    Lexer lexer(std::move(input));
+    const Token peeked = lexer.peek();
+    return peeked == lexer.peek() && peeked == lexer.next();
+}
+
+static_assert(peek_agrees_with_next("a|b"));
+static_assert(peek_agrees_with_next(""));
 
 // A SyntaxError thrown and caught inside a constant expression (C++26).
 static_assert(position_of_dangling_backslash("a\\") ==

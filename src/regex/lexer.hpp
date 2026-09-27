@@ -3,7 +3,7 @@
 #include <string>
 #include <utility>
 
-#include "regex/error.hpp" // IWYU pragma: export
+#include "regex/error.hpp"
 #include "regex/position.hpp"
 #include "regex/token.hpp"
 #include "util/ascii.hpp"
@@ -16,15 +16,23 @@ class Lexer {
     constexpr explicit Lexer(std::string input) noexcept
         : input_(std::move(input)) {}
 
-    [[nodiscard]] constexpr Token next() {
-        while (!eof() && is_space(peek())) {
-            advance();
+    [[nodiscard]] constexpr Token next() { return scan(cursor_); }
+
+    [[nodiscard]] constexpr Token peek() const {
+        Position cursor = cursor_;
+        return scan(cursor);
+    }
+
+  private:
+    [[nodiscard]] constexpr Token scan(Position& cursor) const {
+        while (!eof(cursor) && is_space(symbol_at(cursor))) {
+            advance(cursor);
         }
 
-        if (eof()) { return {TokenType::End, '\0', cursor_}; }
+        if (eof(cursor)) { return {TokenType::End, '\0', cursor}; }
 
-        Position start = cursor_;
-        Symbol c = advance();
+        const Position start = cursor;
+        const Symbol c = advance(cursor);
 
         switch (c) {
             case '|':
@@ -36,25 +44,26 @@ class Lexer {
             case ')':
                 return {TokenType::Rparen, c, start};
             case '\\': {
-                if (eof()) { throw SyntaxError("Dangling backslash", start); }
-                Symbol d = advance();
-                return {TokenType::Letter, d, start};
+                if (eof(cursor)) {
+                    throw SyntaxError("Dangling backslash", start);
+                }
+                return {TokenType::Letter, advance(cursor), start};
             }
             default:
                 return {TokenType::Letter, c, start};
         }
     }
 
-  private:
-    [[nodiscard]] constexpr bool eof() const noexcept {
-        return cursor_.offset >= input_.size();
+    [[nodiscard]] constexpr bool eof(const Position& cursor) const noexcept {
+        return cursor.offset >= input_.size();
     }
-    [[nodiscard]] constexpr Symbol peek() const noexcept {
-        return to_symbol(input_[cursor_.offset]);
+    [[nodiscard]] constexpr Symbol
+    symbol_at(const Position& cursor) const noexcept {
+        return to_symbol(input_[cursor.offset]);
     }
-    constexpr Symbol advance() noexcept {
-        Symbol symbol = peek();
-        cursor_.advance(symbol);
+    constexpr Symbol advance(Position& cursor) const noexcept {
+        const Symbol symbol = symbol_at(cursor);
+        cursor.advance(symbol);
         return symbol;
     }
 
