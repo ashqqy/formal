@@ -47,7 +47,7 @@ inline std::ostream& operator<<(std::ostream& os, const Token& token) {
     os << token.type();
     os << " '";
     if (is_print(token.symbol())) {
-        os << static_cast<char>(token.symbol());
+        os << to_char(token.symbol());
     } else {
         os << std::format("\\x{:02x}", token.symbol());
     }

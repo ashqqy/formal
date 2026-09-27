@@ -67,9 +67,8 @@ TEST_P(LexerOperator, HasItsOwnType) {
     const std::vector<Token> tokens =
         tokenize(std::string(1, operator_case.input));
     ASSERT_EQ(tokens.size(), 2U);
-    EXPECT_EQ(tokens[0],
-              Token(operator_case.type,
-                    static_cast<Symbol>(operator_case.input), at(1, 1, 0)));
+    EXPECT_EQ(tokens[0], Token(operator_case.type,
+                               to_symbol(operator_case.input), at(1, 1, 0)));
 }
 
 INSTANTIATE_TEST_SUITE_P(

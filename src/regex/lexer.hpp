@@ -50,7 +50,7 @@ class Lexer {
         return cursor_.offset >= input_.size();
     }
     [[nodiscard]] constexpr Symbol peek() const noexcept {
-        return static_cast<Symbol>(input_[cursor_.offset]);
+        return to_symbol(input_[cursor_.offset]);
     }
     constexpr Symbol advance() noexcept {
         Symbol symbol = peek();

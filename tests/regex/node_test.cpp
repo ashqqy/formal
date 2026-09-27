@@ -41,7 +41,7 @@ class Counter final : public Visitor {
 class SymbolCollector final : public Visitor {
   public:
     constexpr void visit(const SymbolNode& node) override {
-        out += static_cast<char>(node.symbol());
+        out += to_char(node.symbol());
     }
     constexpr void visit(const EpsilonNode&) override { out += '@'; }
 

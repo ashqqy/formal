@@ -61,7 +61,7 @@ class Printer final : public Visitor {
             symbol == '\\' || symbol == ' ') {
             out_ += '\\';
         }
-        out_ += static_cast<char>(symbol);
+        out_ += to_char(symbol);
     }
 
     [[nodiscard]] constexpr bool is_operand_position() const {
