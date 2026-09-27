@@ -52,6 +52,7 @@ class ConcatNode final : public Node {
     constexpr void accept(Visitor& v) const override { v.visit(*this); }
 
     [[nodiscard]] constexpr const Node& child(std::size_t idx) const noexcept {
+        assert(idx < children_.size() && "child index out of range");
         return *children_[idx];
     }
     [[nodiscard]] constexpr std::size_t size() const noexcept {
@@ -75,6 +76,7 @@ class UnionNode final : public Node {
     constexpr void accept(Visitor& v) const override { v.visit(*this); }
 
     [[nodiscard]] constexpr const Node& child(std::size_t idx) const noexcept {
+        assert(idx < children_.size() && "child index out of range");
         return *children_[idx];
     }
     [[nodiscard]] constexpr std::size_t size() const noexcept {
@@ -128,13 +130,19 @@ template <std::same_as<NodePtr>... Children>
 
 [[nodiscard]] constexpr NodePtr make_concat(std::vector<NodePtr> children) {
     if (children.empty()) { return make_epsilon(); }
-    if (children.size() == 1) { return std::move(children.front()); }
+    if (children.size() == 1) {
+        assert(children.front() != nullptr && "a child must not be null");
+        return std::move(children.front());
+    }
     return std::make_unique<ConcatNode>(std::move(children));
 }
 
 [[nodiscard]] constexpr NodePtr make_union(std::vector<NodePtr> children) {
     assert(!children.empty() && "an empty union would be the empty language");
-    if (children.size() == 1) { return std::move(children.front()); }
+    if (children.size() == 1) {
+        assert(children.front() != nullptr && "a child must not be null");
+        return std::move(children.front());
+    }
     return std::make_unique<UnionNode>(std::move(children));
 }
 
@@ -145,6 +153,8 @@ template <std::same_as<NodePtr>... Children>
 
 template <std::same_as<NodePtr>... Children>
 [[nodiscard]] constexpr NodePtr make_union(Children... children) {
+    static_assert(sizeof...(Children) >= 1,
+                  "a union needs at least one branch");
     return make_union(detail::pack(std::move(children)...));
 }
 

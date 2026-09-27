@@ -143,6 +143,7 @@ TEST(Node, UnionOfThreeIsFlat) {
 
     EXPECT_EQ(counter.unions, 1);
     EXPECT_EQ(counter.symbols, 3);
+    EXPECT_EQ(collect(*tree), "abc");
 }
 
 TEST(Node, ConcatOfNothingIsEpsilon) {
