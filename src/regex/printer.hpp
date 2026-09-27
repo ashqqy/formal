@@ -2,7 +2,6 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <ostream>
 #include <string>
 #include <utility>
 
@@ -74,15 +73,5 @@ class Printer final : public Visitor {
     std::string out_;
     Precedence parent_precedence_ = Precedence::Union;
 };
-
-[[nodiscard]] constexpr std::string to_string(const Node& root) {
-    Printer printer;
-    root.accept(printer);
-    return std::move(printer).take();
-}
-
-inline std::ostream& operator<<(std::ostream& os, const Node& node) {
-    return os << to_string(node);
-}
 
 } // namespace formal::regex

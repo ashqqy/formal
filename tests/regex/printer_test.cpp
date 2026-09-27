@@ -1,5 +1,5 @@
-#include <sstream>
 #include <string>
+#include <utility>
 
 #include <gtest/gtest.h>
 
@@ -8,6 +8,13 @@
 
 namespace formal::regex {
 namespace {
+
+constexpr std::string to_string(const Node& root) {
+    Printer printer;
+    root.accept(printer);
+    return std::move(printer).take();
+}
+
 
 TEST(Printer, PrintsASymbol) {
     EXPECT_EQ(to_string(*make_symbol('a')), "a");
@@ -94,17 +101,6 @@ TEST(Printer, KeepsParensOfNestedGroups) {
     EXPECT_EQ(to_string(*tree), "(ab|c)*");
 }
 
-TEST(Printer, StreamOutputMatchesToString) {
-    const NodePtr tree =
-        make_concat(make_union(make_symbol('a'), make_symbol('b')),
-                    make_star(make_symbol('c')));
-
-    std::ostringstream out;
-    out << *tree;
-
-    EXPECT_EQ(out.str(), to_string(*tree));
-    EXPECT_EQ(out.str(), "(a|b)c*");
-}
 
 constexpr bool prints_at_compile_time() {
     return to_string(*make_star(
