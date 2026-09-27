@@ -1,10 +1,11 @@
+#include <cstddef>
 #include <iostream>
 #include <span>
 #include <string>
 
+#include "regex.hpp"
 #include "regex/error.hpp"
-#include "regex/parser.hpp"
-#include "regex/printer.hpp"
+#include "regex/position.hpp"
 
 int main(int argc, char** argv) {
     const std::span<char*> args(argv, static_cast<std::size_t>(argc));
@@ -14,8 +15,7 @@ int main(int argc, char** argv) {
     }
 
     try {
-        const formal::regex::NodePtr tree = formal::regex::parse(args[1]);
-        std::cout << *tree << '\n';
+        std::cout << formal::Regex(args[1]) << '\n';
     } catch (const formal::regex::SyntaxError& error) {
         const formal::regex::Position position = error.position();
         std::cerr << "error at " << position.line << ':' << position.column
