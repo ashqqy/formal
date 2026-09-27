@@ -5,6 +5,7 @@
 
 #include "regex/position.hpp"
 #include "regex/token.hpp"
+#include "regex/token_print.hpp"
 #include "util/symbol.hpp"
 
 namespace formal::regex {

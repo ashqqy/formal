@@ -11,6 +11,14 @@ namespace formal::regex {
 namespace {
 
 class Counter final : public Visitor {
+  private:
+    template <class N>
+    constexpr void visit_children(const N& node) {
+        for (std::size_t i = 0; i < node.size(); ++i) {
+            node.child(i).accept(*this);
+        }
+    }
+
   public:
     constexpr void visit(const SymbolNode&) override { ++symbols; }
     constexpr void visit(const EpsilonNode&) override { ++epsilons; }
@@ -28,14 +36,6 @@ class Counter final : public Visitor {
     constexpr void visit(const StarNode& node) override {
         ++stars;
         node.child().accept(*this);
-    }
-
-  private:
-    template <class N>
-    constexpr void visit_children(const N& node) {
-        for (std::size_t i = 0; i < node.size(); ++i) {
-            node.child(i).accept(*this);
-        }
     }
 
   public:

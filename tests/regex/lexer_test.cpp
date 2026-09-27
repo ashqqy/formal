@@ -9,6 +9,7 @@
 #include "regex/lexer.hpp"
 #include "regex/position.hpp"
 #include "regex/token.hpp"
+#include "regex/token_print.hpp"
 #include "util/enum_name.hpp"
 #include "util/symbol.hpp"
 
@@ -230,7 +231,6 @@ constexpr bool peek_agrees_with_next(std::string input) {
 static_assert(peek_agrees_with_next("a|b"));
 static_assert(peek_agrees_with_next(""));
 
-// A SyntaxError thrown and caught inside a constant expression (C++26).
 static_assert(position_of_dangling_backslash("a\\") ==
               Position{.line = 1, .column = 2, .offset = 1});
 
