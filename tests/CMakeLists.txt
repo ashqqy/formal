@@ -18,6 +18,7 @@ FetchContent_MakeAvailable(googletest)
 add_executable(
     formal_tests
     regex_test.cpp
+    regex/dot_test.cpp
     regex/node_test.cpp
     regex/parser_test.cpp
     regex/printer_test.cpp

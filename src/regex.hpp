@@ -4,6 +4,7 @@
 #include <string>
 #include <utility>
 
+#include "regex/dot.hpp"
 #include "regex/error.hpp" // IWYU pragma: export
 #include "regex/node.hpp"
 #include "regex/parser.hpp"
@@ -18,6 +19,12 @@ class Regex {
 
     [[nodiscard]] constexpr std::string to_string() const {
         regex::Printer printer;
+        root_->accept(printer);
+        return std::move(printer).take();
+    }
+
+    [[nodiscard]] constexpr std::string to_dot() const {
+        regex::DotPrinter printer;
         root_->accept(printer);
         return std::move(printer).take();
     }
