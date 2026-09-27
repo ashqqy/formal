@@ -67,6 +67,14 @@ ctest --preset debug          # тесты
 build/debug/examples/formal_print 'a|bc*'
 ```
 
+С флагом `--dot` он печатает дерево разбора в формате Graphviz:
+
+```sh
+build/debug/examples/formal_print --dot 'a|bc*' | dot -Tsvg -o tree.svg
+```
+
+Для просмотра картинки нужен установленный `graphviz`.
+
 ## Санитайзеры
 
 Debug-сборка с AddressSanitizer и UBSan:
