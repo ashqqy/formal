@@ -5,6 +5,8 @@
 #include <cstddef>
 #include <cstdint>
 #include <limits>
+#include <stdexcept>
+#include <string_view>
 
 #include "util/symbol.hpp"
 
@@ -12,6 +14,34 @@ namespace formal {
 
 class Alphabet {
   public:
+    [[nodiscard]] static constexpr Alphabet
+    from_symbols(std::string_view symbols) noexcept {
+        Alphabet alphabet;
+        for (char c : symbols) {
+            alphabet.add(to_symbol(c));
+        }
+        return alphabet;
+    }
+
+    [[nodiscard]] static constexpr Alphabet from_range(Symbol first,
+                                                       Symbol last) {
+        if (first > last) {
+            throw std::invalid_argument("Alphabet::from_range: first > last");
+        }
+        Alphabet alphabet;
+        for (std::size_t s = first; s <= last; ++s) {
+            alphabet.add(static_cast<Symbol>(s));
+        }
+        return alphabet;
+    }
+
+    [[nodiscard]] static constexpr Alphabet all() noexcept {
+        static_assert(symbol_count % chunk_bits == 0);
+        Alphabet alphabet;
+        alphabet.chunks_.fill(~Chunk{0});
+        return alphabet;
+    }
+
     constexpr void add(Symbol symbol) noexcept {
         chunks_[chunk_of(symbol)] |= mask_of(symbol);
     }
