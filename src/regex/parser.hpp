@@ -47,7 +47,7 @@ class Parser {
     }
 
     [[nodiscard]] constexpr bool can_begin_atom() const {
-        return check(TokenType::Letter, TokenType::Lparen);
+        return check(TokenType::Letter, TokenType::LParen);
     }
 
     [[nodiscard]] constexpr NodePtr parse_union() {
@@ -79,10 +79,10 @@ class Parser {
         if (check(TokenType::Letter)) {
             return make_symbol(lexer_.next().symbol());
         }
-        if (check(TokenType::Lparen)) {
+        if (check(TokenType::LParen)) {
             const Token open = lexer_.next();
             NodePtr inner = parse_union();
-            expect(TokenType::Rparen, "Missing ')'", open.position());
+            expect(TokenType::RParen, "Missing ')'", open.position());
             return inner;
         }
         throw SyntaxError("Expected an expression", lexer_.peek().position());

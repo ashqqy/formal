@@ -10,8 +10,8 @@ namespace formal::regex {
 enum class TokenType : std::uint8_t {
     Pipe,
     Star,
-    Lparen,
-    Rparen,
+    LParen,
+    RParen,
     Letter,
     End,
 };

@@ -40,9 +40,9 @@ class Lexer {
             case '*':
                 return {TokenType::Star, c, start};
             case '(':
-                return {TokenType::Lparen, c, start};
+                return {TokenType::LParen, c, start};
             case ')':
-                return {TokenType::Rparen, c, start};
+                return {TokenType::RParen, c, start};
             case '\\': {
                 if (eof(cursor)) {
                     throw SyntaxError("Dangling backslash", start);

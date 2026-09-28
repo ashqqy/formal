@@ -17,10 +17,10 @@ namespace formal::regex {
             return "Pipe";
         case TokenType::Star:
             return "Star";
-        case TokenType::Lparen:
-            return "Lparen";
-        case TokenType::Rparen:
-            return "Rparen";
+        case TokenType::LParen:
+            return "LParen";
+        case TokenType::RParen:
+            return "RParen";
         case TokenType::Letter:
             return "Letter";
         case TokenType::End:

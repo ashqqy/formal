@@ -75,8 +75,8 @@ INSTANTIATE_TEST_SUITE_P(
     Operators, LexerOperator,
     testing::Values(OperatorCase{'|', TokenType::Pipe},
                     OperatorCase{'*', TokenType::Star},
-                    OperatorCase{'(', TokenType::Lparen},
-                    OperatorCase{')', TokenType::Rparen}),
+                    OperatorCase{'(', TokenType::LParen},
+                    OperatorCase{')', TokenType::RParen}),
     [](const testing::TestParamInfo<OperatorCase>& test_case) {
         return std::string(name(test_case.param.type));
     });
@@ -203,11 +203,11 @@ constexpr Position position_of_dangling_backslash(std::string input) {
 static_assert(token_count("a*(b|c)") == 8);
 static_assert(type_at("a*(b|c)", 0) == TokenType::Letter);
 static_assert(type_at("a*(b|c)", 1) == TokenType::Star);
-static_assert(type_at("a*(b|c)", 2) == TokenType::Lparen);
+static_assert(type_at("a*(b|c)", 2) == TokenType::LParen);
 static_assert(type_at("a*(b|c)", 3) == TokenType::Letter);
 static_assert(type_at("a*(b|c)", 4) == TokenType::Pipe);
 static_assert(type_at("a*(b|c)", 5) == TokenType::Letter);
-static_assert(type_at("a*(b|c)", 6) == TokenType::Rparen);
+static_assert(type_at("a*(b|c)", 6) == TokenType::RParen);
 static_assert(type_at("a*(b|c)", 7) == TokenType::End);
 
 static_assert(token_at("a*(b|c)", 3) ==
