@@ -45,7 +45,7 @@ class Lexer {
                 return {TokenType::RParen, c, start};
             case '\\': {
                 if (eof(cursor)) {
-                    throw SyntaxError("Dangling backslash", start);
+                    throw SyntaxError("Nothing to escape after '\\'", start);
                 }
                 return {TokenType::Letter, advance(cursor), start};
             }

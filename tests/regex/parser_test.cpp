@@ -157,6 +157,13 @@ TEST(ParserLexerSeam, IgnoresWhitespace) {
     EXPECT_EQ(round_trip("( a b )*"), "(ab)*");
 }
 
+std::string error_message(std::string pattern) {
+    try {
+        (void)parse(std::move(pattern));
+    } catch (const SyntaxError& error) { return error.what(); }
+    return {};
+}
+
 TEST(ParserError, ReportsAnUnclosedGroupAtItsOpeningParen) {
     try {
         (void)parse("(ab");
@@ -172,7 +179,7 @@ TEST(ParserError, ReportsATrailingToken) {
         (void)parse("a)");
         FAIL() << "expected a SyntaxError";
     } catch (const SyntaxError& error) {
-        EXPECT_STREQ(error.what(), "Unexpected token");
+        EXPECT_STREQ(error.what(), "Unmatched ')'");
         EXPECT_EQ(error.position(), at(1, 2, 1));
     }
 }
@@ -182,7 +189,7 @@ TEST(ParserError, ReportsAStarWithoutAnExpression) {
         (void)parse("*a");
         FAIL() << "expected a SyntaxError";
     } catch (const SyntaxError& error) {
-        EXPECT_STREQ(error.what(), "Unexpected token");
+        EXPECT_STREQ(error.what(), "Nothing to repeat before '*'");
         EXPECT_EQ(error.position(), at(1, 1, 0));
     }
 }
@@ -192,9 +199,13 @@ TEST(ParserError, LetsALexerErrorThrough) {
         (void)parse("a\\");
         FAIL() << "expected a SyntaxError";
     } catch (const SyntaxError& error) {
-        EXPECT_STREQ(error.what(), "Dangling backslash");
+        EXPECT_STREQ(error.what(), "Nothing to escape after '\\'");
         EXPECT_EQ(error.position(), at(1, 2, 1));
     }
+}
+
+TEST(ParserError, TellsUnexpectedTokensApart) {
+    EXPECT_NE(error_message("a)"), error_message("*a"));
 }
 
 static_assert(round_trip("a|bc*") == "a|bc*");

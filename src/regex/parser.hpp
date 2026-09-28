@@ -2,6 +2,7 @@
 
 #include <concepts>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -21,7 +22,8 @@ class Parser {
     [[nodiscard]] constexpr NodePtr parse() {
         NodePtr tree = parse_union();
         if (!check(TokenType::End)) {
-            throw SyntaxError("Unexpected token", lexer_.peek().position());
+            const Token token = lexer_.peek();
+            throw SyntaxError(unexpected(token.type()), token.position());
         }
         return tree;
     }
@@ -44,6 +46,21 @@ class Parser {
     constexpr void expect(TokenType type, const char* message,
                           Position position) {
         if (!try_consume(type)) { throw SyntaxError(message, position); }
+    }
+
+    [[nodiscard]] static std::string_view unexpected(TokenType type) {
+        switch (type) {
+            case TokenType::Star:
+                return "Nothing to repeat before '*'";
+            case TokenType::RParen:
+                return "Unmatched ')'";
+            case TokenType::Pipe:
+            case TokenType::LParen:
+            case TokenType::Letter:
+            case TokenType::End:
+                break;
+        }
+        return "Unexpected token";
     }
 
     [[nodiscard]] constexpr bool can_begin_atom() const {
