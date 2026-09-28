@@ -10,6 +10,7 @@
 #include "regex/position.hpp"
 #include "regex/token.hpp"
 #include "regex/token_print.hpp"
+#include "util/alphabet.hpp"
 #include "util/symbol.hpp"
 
 namespace formal::regex {
@@ -17,8 +18,9 @@ namespace {
 
 // Collects every token, End included, so that a test can compare whole inputs.
 // Usable in a constant expression: everything it touches dies with it.
-constexpr std::vector<Token> tokenize(std::string input) {
-    Lexer lexer(std::move(input));
+constexpr std::vector<Token> tokenize(std::string input,
+                                      Alphabet allowed = Alphabet::all()) {
+    Lexer lexer(std::move(input), allowed);
     std::vector<Token> tokens;
     for (;;) {
         Token token = lexer.next();
@@ -120,6 +122,49 @@ TEST(LexerEscape, DanglingBackslashThrows) {
     } catch (const SyntaxError& error) {
         EXPECT_EQ(error.position(), at(1, 2, 1));
         EXPECT_STREQ(error.what(), "Nothing to escape after '\\'");
+    }
+}
+
+TEST(LexerAlphabet, AcceptsSymbolsInside) {
+    const std::vector<Token> tokens =
+        tokenize("ab", Alphabet::from_symbols("ab"));
+    ASSERT_EQ(tokens.size(), 3U);
+    EXPECT_EQ(tokens[0], Token(TokenType::Letter, 'a', at(1, 1, 0)));
+    EXPECT_EQ(tokens[1], Token(TokenType::Letter, 'b', at(1, 2, 1)));
+}
+
+TEST(LexerAlphabet, RejectsSymbolsOutside) {
+    try {
+        tokenize("abc", Alphabet::from_symbols("ab"));
+        FAIL() << "expected a SyntaxError";
+    } catch (const SyntaxError& error) {
+        EXPECT_EQ(error.position(), at(1, 3, 2));
+        EXPECT_STREQ(error.what(), "Symbol 'c' outside the alphabet");
+    }
+}
+
+// The alphabet holds the symbols of the language, not of the notation.
+TEST(LexerAlphabet, LeavesOperatorsAlone) {
+    EXPECT_NO_THROW(tokenize("a|b", Alphabet::from_symbols("ab")));
+    EXPECT_NO_THROW(tokenize("(a)*", Alphabet::from_symbols("a")));
+}
+
+TEST(LexerAlphabet, ChecksAnEscapedOperator) {
+    try {
+        tokenize("\\*", Alphabet::from_symbols("ab"));
+        FAIL() << "expected a SyntaxError";
+    } catch (const SyntaxError& error) {
+        EXPECT_EQ(error.position(), at(1, 1, 0));
+        EXPECT_STREQ(error.what(), "Symbol '*' outside the alphabet");
+    }
+}
+
+TEST(LexerAlphabet, EscapesANonPrintableSymbol) {
+    try {
+        tokenize(std::string{'\x01'}, Alphabet::from_symbols("ab"));
+        FAIL() << "expected a SyntaxError";
+    } catch (const SyntaxError& error) {
+        EXPECT_STREQ(error.what(), "Symbol '\\x01' outside the alphabet");
     }
 }
 

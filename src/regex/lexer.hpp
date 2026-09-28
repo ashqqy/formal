@@ -6,15 +6,18 @@
 #include "regex/error.hpp"
 #include "regex/position.hpp"
 #include "regex/token.hpp"
+#include "util/alphabet.hpp"
 #include "util/ascii.hpp"
 #include "util/symbol.hpp"
+#include "util/symbol_print.hpp"
 
 namespace formal::regex {
 
 class Lexer {
   public:
-    constexpr explicit Lexer(std::string input) noexcept
-        : input_(std::move(input)) {}
+    constexpr Lexer(std::string input,
+                    Alphabet allowed = Alphabet::all()) noexcept
+        : input_(std::move(input)), allowed_(allowed) {}
 
     [[nodiscard]] constexpr Token next() { return scan(cursor_); }
 
@@ -47,11 +50,19 @@ class Lexer {
                 if (eof(cursor)) {
                     throw SyntaxError("Nothing to escape after '\\'", start);
                 }
-                return {TokenType::Letter, advance(cursor), start};
+                return letter(advance(cursor), start);
             }
             default:
-                return {TokenType::Letter, c, start};
+                return letter(c, start);
         }
+    }
+
+    [[nodiscard]] constexpr Token letter(Symbol symbol, Position start) const {
+        if (!allowed_.contains(symbol)) {
+            throw SyntaxError(
+                "Symbol '" + escaped(symbol) + "' outside the alphabet", start);
+        }
+        return {TokenType::Letter, symbol, start};
     }
 
     [[nodiscard]] constexpr bool eof(const Position& cursor) const noexcept {
@@ -68,6 +79,7 @@ class Lexer {
     }
 
     std::string input_;
+    Alphabet allowed_;
     Position cursor_;
 };
 
