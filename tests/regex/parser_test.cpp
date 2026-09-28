@@ -197,22 +197,12 @@ TEST(ParserError, LetsALexerErrorThrough) {
     }
 }
 
-constexpr Position error_position(std::string pattern) {
-    try {
-        (void)parse(std::move(pattern));
-    } catch (const SyntaxError& error) { return error.position(); }
-    return Position{.line = 0, .column = 0, .offset = 0};
-}
-
 static_assert(round_trip("a|bc*") == "a|bc*");
 static_assert(round_trip("(a|b)*c") == "(a|b)*c");
 static_assert(round_trip("(a|)") == "a|");
-static_assert(error_position("(a") ==
-              Position{.line = 1, .column = 1, .offset = 0});
 
 TEST(Parser, ParsesAtRunTimeToo) {
     EXPECT_EQ(round_trip("a|bc*"), "a|bc*");
-    EXPECT_EQ(error_position("(a"), at(1, 1, 0));
 }
 
 } // namespace

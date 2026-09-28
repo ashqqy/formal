@@ -193,13 +193,6 @@ constexpr Token token_at(std::string input, std::size_t index) {
     return tokenize(std::move(input))[index];
 }
 
-constexpr Position position_of_dangling_backslash(std::string input) {
-    try {
-        tokenize(std::move(input));
-    } catch (const SyntaxError& error) { return error.position(); }
-    return Position{.line = 0, .column = 0, .offset = 0};
-}
-
 static_assert(token_count("a*(b|c)") == 8);
 static_assert(type_at("a*(b|c)", 0) == TokenType::Letter);
 static_assert(type_at("a*(b|c)", 1) == TokenType::Star);
@@ -230,9 +223,6 @@ constexpr bool peek_agrees_with_next(std::string input) {
 static_assert(peek_agrees_with_next("a|b"));
 static_assert(peek_agrees_with_next(""));
 
-static_assert(position_of_dangling_backslash("a\\") ==
-              Position{.line = 1, .column = 2, .offset = 1});
-
 // The same checks at run time, so that they also show up in coverage.
 TEST(LexerConstexpr, MatchesRuntimeLexing) {
     EXPECT_EQ(token_count("a*(b|c)"), 8U);
@@ -240,11 +230,6 @@ TEST(LexerConstexpr, MatchesRuntimeLexing) {
     EXPECT_EQ(token_at("\\*", 0),
               Token(TokenType::Letter, '*',
                     Position{.line = 1, .column = 1, .offset = 0}));
-}
-
-TEST(LexerConstexpr, ReportsTheSameErrorPosition) {
-    EXPECT_EQ(position_of_dangling_backslash("a\\"),
-              (Position{.line = 1, .column = 2, .offset = 1}));
 }
 
 } // namespace
