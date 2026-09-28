@@ -7,8 +7,7 @@
 
 #include "regex/node.hpp"
 #include "regex/visitor.hpp"
-#include "util/ascii.hpp"
-#include "util/symbol.hpp"
+#include "util/dot.hpp"
 
 namespace formal::regex {
 
@@ -19,10 +18,12 @@ class DotPrinter final : public Visitor {
     }
 
     constexpr void visit(const SymbolNode& node) override {
-        declare(label_of(node.symbol()));
+        declare(dot_label(node.symbol()));
     }
 
-    constexpr void visit(const EpsilonNode&) override { declare("Epsilon"); }
+    constexpr void visit(const EpsilonNode& /*unused*/) override {
+        declare("Epsilon");
+    }
 
     constexpr void visit(const ConcatNode& node) override {
         const std::size_t id = declare("Concat");
@@ -55,14 +56,6 @@ class DotPrinter final : public Visitor {
         child.accept(*this);
         body_ += std::format("  n{} -> n{};\n", parent, current_);
         current_ = parent;
-    }
-
-    [[nodiscard]] static constexpr std::string label_of(Symbol symbol) {
-        if (symbol == '"' || symbol == '\\') {
-            return std::string{'\\'} + to_char(symbol);
-        }
-        if (is_print(symbol)) { return std::string{to_char(symbol)}; }
-        return std::format("\\\\x{:02x}", symbol);
     }
 
     std::string body_;
