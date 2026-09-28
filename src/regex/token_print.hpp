@@ -1,13 +1,11 @@
 #pragma once
 
-#include <format>
 #include <ostream>
 #include <string_view>
 
 #include "regex/position.hpp"
 #include "regex/token.hpp"
-#include "util/ascii.hpp"
-#include "util/symbol.hpp"
+#include "util/symbol_print.hpp"
 
 namespace formal::regex {
 
@@ -36,11 +34,7 @@ inline std::ostream& operator<<(std::ostream& os, TokenType type) {
 inline std::ostream& operator<<(std::ostream& os, const Token& token) {
     os << token.type();
     os << " '";
-    if (is_print(token.symbol())) {
-        os << to_char(token.symbol());
-    } else {
-        os << std::format("\\x{:02x}", token.symbol());
-    }
+    os << escaped(token.symbol());
     os << '\'';
     return os << " at " << token.position();
 }
