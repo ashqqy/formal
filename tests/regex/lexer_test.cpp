@@ -10,7 +10,6 @@
 #include "regex/position.hpp"
 #include "regex/token.hpp"
 #include "regex/token_print.hpp"
-#include "util/enum_name.hpp"
 #include "util/symbol.hpp"
 
 namespace formal::regex {
@@ -79,7 +78,7 @@ INSTANTIATE_TEST_SUITE_P(
                     OperatorCase{'(', TokenType::Lparen},
                     OperatorCase{')', TokenType::Rparen}),
     [](const testing::TestParamInfo<OperatorCase>& test_case) {
-        return std::string(enum_name(test_case.param.type));
+        return std::string(name(test_case.param.type));
     });
 
 TEST(LexerEscape, TurnsAnOperatorIntoALetter) {

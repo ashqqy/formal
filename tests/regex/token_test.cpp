@@ -1,5 +1,6 @@
 #include <sstream>
 #include <string>
+#include <string_view>
 
 #include <gtest/gtest.h>
 
@@ -21,7 +22,25 @@ std::string print(const Token& token) {
     return out.str();
 }
 
-TEST(TokenTypePrint, UsesEnumName) {
+static_assert(name(TokenType::Pipe) == "Pipe");
+static_assert(name(TokenType::Star) == "Star");
+static_assert(name(TokenType::Lparen) == "Lparen");
+static_assert(name(TokenType::Rparen) == "Rparen");
+static_assert(name(TokenType::Letter) == "Letter");
+static_assert(name(TokenType::End) == "End");
+static_assert(name(static_cast<TokenType>(42)) == "<unknown>");
+
+// The names label the parameterised lexer tests, so spelling matters.
+TEST(TokenTypeName, NamesEveryTokenType) {
+    EXPECT_EQ(name(TokenType::Pipe), "Pipe");
+    EXPECT_EQ(name(TokenType::Star), "Star");
+    EXPECT_EQ(name(TokenType::Lparen), "Lparen");
+    EXPECT_EQ(name(TokenType::Rparen), "Rparen");
+    EXPECT_EQ(name(TokenType::Letter), "Letter");
+    EXPECT_EQ(name(TokenType::End), "End");
+}
+
+TEST(TokenTypePrint, WritesTheName) {
     std::ostringstream out;
     out << TokenType::Lparen;
     EXPECT_EQ(out.str(), "Lparen");

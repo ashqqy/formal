@@ -2,17 +2,35 @@
 
 #include <format>
 #include <ostream>
+#include <string_view>
 
 #include "regex/position.hpp"
 #include "regex/token.hpp"
 #include "util/ascii.hpp"
-#include "util/enum_name.hpp"
 #include "util/symbol.hpp"
 
 namespace formal::regex {
 
+[[nodiscard]] constexpr std::string_view name(TokenType type) {
+    switch (type) {
+        case TokenType::Pipe:
+            return "Pipe";
+        case TokenType::Star:
+            return "Star";
+        case TokenType::Lparen:
+            return "Lparen";
+        case TokenType::Rparen:
+            return "Rparen";
+        case TokenType::Letter:
+            return "Letter";
+        case TokenType::End:
+            return "End";
+    }
+    return "<unknown>";
+}
+
 inline std::ostream& operator<<(std::ostream& os, TokenType type) {
-    return os << enum_name(type);
+    return os << name(type);
 }
 
 inline std::ostream& operator<<(std::ostream& os, const Token& token) {

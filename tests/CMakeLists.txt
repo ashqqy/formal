@@ -24,7 +24,6 @@ add_executable(
     regex/printer_test.cpp
     regex/lexer_test.cpp
     regex/token_test.cpp
-    util/enum_name_test.cpp
 )
 target_link_libraries(
     formal_tests
