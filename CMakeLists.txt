@@ -2,19 +2,29 @@ cmake_minimum_required(VERSION 3.25)
 
 project(formal LANGUAGES CXX)
 
+# GCC and Clang number their releases on different scales, so each gets its
+# own floor. An empty floor means the compiler is not supported at all.
+set(FORMAL_MINIMUM_VERSION "")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set(FORMAL_MINIMUM_VERSION 14)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    set(FORMAL_MINIMUM_VERSION 18)
+endif()
+
 if(
-    NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
-    OR CMAKE_CXX_COMPILER_VERSION VERSION_LESS 16
+    FORMAL_MINIMUM_VERSION STREQUAL ""
+    OR CMAKE_CXX_COMPILER_VERSION VERSION_LESS FORMAL_MINIMUM_VERSION
 )
     message(
         FATAL_ERROR
-        "GCC 16+ required, found ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}.\n"
+        "GCC 14+ or Clang 18+ required, found ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}.\n"
         "Delete the build directory and re-run with the compiler set, e.g.:\n"
-        "  CXX=g++-16 cmake --workflow --preset release"
+        "  CXX=g++ cmake --workflow --preset release\n"
+        "  CXX=clang++ cmake --workflow --preset release"
     )
 endif()
 
-set(CMAKE_CXX_STANDARD 26)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

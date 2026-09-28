@@ -149,8 +149,10 @@ TEST(LexerPeek, DoesNotConsume) {
 
 TEST(LexerPeek, SkipsWhitespaceLikeNext) {
     Lexer lexer(" \t a");
-    EXPECT_EQ(lexer.peek(), Token(TokenType::Letter, 'a', at(1, 4, 3)));
-    EXPECT_EQ(lexer.next(), lexer.peek());
+    // Separate statements: argument order is unspecified.
+    const Token letter(TokenType::Letter, 'a', at(1, 4, 3));
+    EXPECT_EQ(lexer.peek(), letter);
+    EXPECT_EQ(lexer.next(), letter);
 }
 
 TEST(LexerPeek, KeepsReturningEndPastTheInput) {
