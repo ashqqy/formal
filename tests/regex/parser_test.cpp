@@ -30,8 +30,8 @@ Position at(std::size_t line, std::size_t column, std::size_t offset) {
 
 class Counter final : public Visitor {
   public:
-    constexpr void visit(const SymbolNode&) override { ++symbols; }
-    constexpr void visit(const EpsilonNode&) override { ++epsilons; }
+    constexpr void visit(const SymbolNode& /*unused*/) override { ++symbols; }
+    constexpr void visit(const EpsilonNode& /*unused*/) override { ++epsilons; }
 
     constexpr void visit(const ConcatNode& node) override {
         ++concats;

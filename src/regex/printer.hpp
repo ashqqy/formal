@@ -18,7 +18,7 @@ class Printer final : public Visitor {
     constexpr void visit(const SymbolNode& node) override {
         append(node.symbol());
     }
-    constexpr void visit(const EpsilonNode&) override {
+    constexpr void visit(const EpsilonNode& /*unused*/) override {
         if (is_operand_position()) { out_ += "()"; }
     }
     constexpr void visit(const ConcatNode& node) override {
