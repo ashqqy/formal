@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <bit>
 #include <cstddef>
 #include <cstdint>
 #include <limits>
@@ -16,6 +17,13 @@ class Alphabet {
     }
     [[nodiscard]] constexpr bool contains(Symbol symbol) const noexcept {
         return (chunks_[chunk_of(symbol)] & mask_of(symbol)) != 0;
+    }
+    [[nodiscard]] constexpr std::size_t size() const noexcept {
+        std::size_t count = 0;
+        for (const Chunk chunk : chunks_) {
+            count += static_cast<std::size_t>(std::popcount(chunk));
+        }
+        return count;
     }
 
     bool operator==(const Alphabet&) const = default;

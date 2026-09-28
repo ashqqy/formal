@@ -21,6 +21,10 @@ static_assert(made({to_symbol('a')}).contains(to_symbol('a')));
 static_assert(!made({to_symbol('a')}).contains(to_symbol('b')));
 static_assert(made({Symbol{0}, Symbol{255}}).contains(Symbol{255}));
 
+static_assert(Alphabet{}.size() == 0);
+static_assert(made({to_symbol('a'), to_symbol('a')}).size() == 1);
+static_assert(made({to_symbol('a'), Symbol{200}}).size() == 2);
+
 TEST(Alphabet, StartsEmpty) {
     const Alphabet alphabet;
     EXPECT_FALSE(alphabet.contains(to_symbol('a')));
@@ -64,6 +68,35 @@ TEST(Alphabet, ComparesByContent) {
               made({to_symbol('b'), to_symbol('a')}));
     EXPECT_NE(made({to_symbol('a')}), made({to_symbol('b')}));
     EXPECT_NE(made({to_symbol('a')}), Alphabet{});
+}
+
+TEST(AlphabetSize, CountsNothingWhenEmpty) {
+    EXPECT_EQ(Alphabet{}.size(), 0U);
+}
+
+TEST(AlphabetSize, CountsDistinctSymbols) {
+    const Alphabet alphabet =
+        made({to_symbol('a'), to_symbol('b'), to_symbol('c')});
+    EXPECT_EQ(alphabet.size(), 3U);
+}
+
+TEST(AlphabetSize, IgnoresRepeats) {
+    EXPECT_EQ(made({to_symbol('a'), to_symbol('a')}).size(), 1U);
+}
+
+TEST(AlphabetSize, CountsAcrossChunks) {
+    const Alphabet alphabet =
+        made({Symbol{0}, to_symbol('a'), Symbol{200}, Symbol{255}});
+    EXPECT_EQ(alphabet.size(), 4U);
+}
+
+// Fills every chunk, so a chunk lost while summing shows up here.
+TEST(AlphabetSize, CountsEverySymbol) {
+    Alphabet alphabet;
+    for (int value = 0; value < 256; ++value) {
+        alphabet.add(static_cast<Symbol>(value));
+    }
+    EXPECT_EQ(alphabet.size(), 256U);
 }
 
 } // namespace
