@@ -2,9 +2,10 @@
 
 - [Синтаксис](#синтаксис)
 - [Требования](#требования)
-- [Сборка и тесты](#сборка-и-тесты)
 - [Примеры](#примеры)
+- [Сборка и тесты](#сборка-и-тесты)
 - [Санитайзеры](#санитайзеры)
+- [Статический анализ](#статический-анализ)
 - [Покрытие](#покрытие)
 
 ## Синтаксис
@@ -37,6 +38,22 @@ atom   := letter | '(' union ')'
 
 Проверьте версию компилятора: `g++ --version`.
 
+## Примеры
+
+`formal_print` печатает каноническую запись регулярки:
+
+```sh
+build/debug/examples/formal_print 'a|bc*'
+```
+
+С флагом `--dot` он печатает дерево разбора в формате Graphviz:
+
+```sh
+build/debug/examples/formal_print --dot 'a|bc*' | dot -Tsvg -o tree.svg
+```
+
+Для просмотра картинки нужен установленный `graphviz`.
+
 ## Сборка и тесты
 
 Проект собирается через CMake-пресеты: `debug`, `release`, `sanitizers`, `coverage`.
@@ -60,28 +77,18 @@ ctest --preset debug          # тесты
 
 Для релизной сборки замените `debug` на `release`.
 
-## Примеры
-
-`formal_print` печатает каноническую запись регулярки:
-
-```sh
-build/debug/examples/formal_print 'a|bc*'
-```
-
-С флагом `--dot` он печатает дерево разбора в формате Graphviz:
-
-```sh
-build/debug/examples/formal_print --dot 'a|bc*' | dot -Tsvg -o tree.svg
-```
-
-Для просмотра картинки нужен установленный `graphviz`.
-
 ## Санитайзеры
 
 Debug-сборка с AddressSanitizer и UBSan:
 
 ```sh
 CXX=g++ cmake --workflow --preset sanitizers
+```
+
+## Статический анализ
+
+```sh
+cmake --build --preset tidy
 ```
 
 ## Покрытие
