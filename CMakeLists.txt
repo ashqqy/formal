@@ -42,5 +42,8 @@ include(cmake/sanitizers.cmake)
 add_subdirectory(src)
 add_subdirectory(examples)
 
+# Reads file lists from the targets above.
+include(cmake/tidy.cmake)
+
 enable_testing()
 add_subdirectory(tests)

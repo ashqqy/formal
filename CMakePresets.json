@@ -41,7 +41,8 @@
       "name": "headers",
       "configurePreset": "debug",
       "targets": ["all_verify_interface_header_sets"]
-    }
+    },
+    { "name": "tidy", "configurePreset": "debug", "targets": ["tidy"] }
   ],
   "testPresets": [
     {
