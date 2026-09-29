@@ -9,13 +9,15 @@
 #include "regex/node.hpp"
 #include "regex/parser.hpp"
 #include "regex/printer.hpp"
+#include "util/alphabet.hpp"
 
 namespace formal {
 
 class Regex {
   public:
-    constexpr explicit Regex(std::string pattern)
-        : root_(regex::parse(std::move(pattern))) {}
+    constexpr explicit Regex(std::string pattern,
+                             Alphabet allowed = Alphabet::all())
+        : root_(regex::parse(std::move(pattern), allowed)) {}
 
     [[nodiscard]] constexpr std::string to_string() const {
         regex::Printer printer;

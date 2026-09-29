@@ -11,13 +11,15 @@
 #include "regex/node.hpp"
 #include "regex/position.hpp"
 #include "regex/token.hpp"
+#include "util/alphabet.hpp"
 
 namespace formal::regex {
 
 class Parser {
   public:
-    constexpr explicit Parser(std::string input) noexcept
-        : lexer_(std::move(input)) {}
+    constexpr explicit Parser(std::string input,
+                              Alphabet allowed = Alphabet::all()) noexcept
+        : lexer_(std::move(input), allowed) {}
 
     [[nodiscard]] constexpr NodePtr parse() {
         NodePtr tree = parse_union();
@@ -108,8 +110,9 @@ class Parser {
     Lexer lexer_;
 };
 
-[[nodiscard]] constexpr NodePtr parse(std::string pattern) {
-    return Parser(std::move(pattern)).parse();
+[[nodiscard]] constexpr NodePtr parse(std::string pattern,
+                                      Alphabet allowed = Alphabet::all()) {
+    return Parser(std::move(pattern), allowed).parse();
 }
 
 } // namespace formal::regex

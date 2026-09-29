@@ -15,8 +15,8 @@ namespace formal::regex {
 
 class Lexer {
   public:
-    constexpr Lexer(std::string input,
-                    Alphabet allowed = Alphabet::all()) noexcept
+    constexpr explicit Lexer(std::string input,
+                             Alphabet allowed = Alphabet::all()) noexcept
         : input_(std::move(input)), allowed_(allowed) {}
 
     [[nodiscard]] constexpr Token next() { return scan(cursor_); }

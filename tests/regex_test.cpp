@@ -7,6 +7,7 @@
 #include "regex.hpp"
 #include "regex/error.hpp"
 #include "regex/position.hpp"
+#include "util/alphabet.hpp"
 
 namespace formal {
 namespace {
@@ -52,6 +53,38 @@ TEST(Regex, ConstructionRejectsABadPattern) {
                   (regex::Position{.line = 1, .column = 1, .offset = 0}));
     }
 }
+
+TEST(RegexAlphabet, AcceptsAPatternInsideTheAlphabet) {
+    const Regex pattern("a|b", Alphabet::from_symbols("ab"));
+    EXPECT_EQ(pattern.to_string(), "a|b");
+}
+
+TEST(RegexAlphabet, RejectsASymbolOutsideTheAlphabet) {
+    try {
+        const Regex pattern("abc", Alphabet::from_symbols("ab"));
+        FAIL() << "expected a SyntaxError";
+    } catch (const regex::SyntaxError& error) {
+        EXPECT_STREQ(error.what(), "Symbol 'c' outside the alphabet");
+        EXPECT_EQ(error.position(),
+                  (regex::Position{.line = 1, .column = 3, .offset = 2}));
+    }
+}
+
+TEST(RegexAlphabet, LeavesOperatorsAlone) {
+    EXPECT_NO_THROW(
+        const Regex pattern("(a|b)*", Alphabet::from_symbols("ab")));
+}
+
+TEST(RegexAlphabet, WithoutAnAlphabetNothingIsRejected) {
+    EXPECT_NO_THROW(const Regex pattern("a|b"));
+}
+
+constexpr bool builds_with_an_alphabet() {
+    const Regex pattern("a|b", Alphabet::from_symbols("ab"));
+    return pattern.to_string() == "a|b";
+}
+
+static_assert(builds_with_an_alphabet());
 
 TEST(Regex, SurvivesAMove) {
     Regex original("ab*");
