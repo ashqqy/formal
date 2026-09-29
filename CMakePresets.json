@@ -36,6 +36,11 @@
       "name": "coverage-report",
       "configurePreset": "coverage",
       "targets": ["coverage"]
+    },
+    {
+      "name": "headers",
+      "configurePreset": "debug",
+      "targets": ["all_verify_interface_header_sets"]
     }
   ],
   "testPresets": [
@@ -60,6 +65,7 @@
       "steps": [
         { "type": "configure", "name": "debug" },
         { "type": "build", "name": "debug" },
+        { "type": "build", "name": "headers" },
         { "type": "test", "name": "debug" }
       ]
     },
