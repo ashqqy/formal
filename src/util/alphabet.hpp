@@ -17,7 +17,7 @@ class Alphabet {
     [[nodiscard]] static constexpr Alphabet
     from_symbols(std::string_view symbols) noexcept {
         Alphabet alphabet;
-        for (char c : symbols) {
+        for (const char c : symbols) {
             alphabet.add(to_symbol(c));
         }
         return alphabet;

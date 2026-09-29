@@ -17,6 +17,13 @@ class Node {
     constexpr virtual ~Node() = default;
 
     constexpr virtual void accept(Visitor& visitor) const = 0;
+
+  protected:
+    Node() = default;
+    Node(const Node&) = default;
+    Node& operator=(const Node&) = default;
+    Node(Node&&) = default;
+    Node& operator=(Node&&) = default;
 };
 
 using NodePtr = std::unique_ptr<Node>;

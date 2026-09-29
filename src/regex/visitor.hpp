@@ -10,6 +10,11 @@ class StarNode;
 
 class Visitor {
   protected:
+    Visitor() = default;
+    Visitor(const Visitor&) = default;
+    Visitor& operator=(const Visitor&) = default;
+    Visitor(Visitor&&) = default;
+    Visitor& operator=(Visitor&&) = default;
     ~Visitor() = default;
 
   public:
