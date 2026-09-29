@@ -1,8 +1,6 @@
 include(FetchContent)
 
-# Keep the sources outside the build tree, so that removing it does not mean
-# downloading them again. Only the sources are shared: every preset still
-# builds googletest with its own flags.
+# Sources outside the build tree; each preset still builds its own gtest.
 set(GOOGLETEST_SOURCE_DIR ${CMAKE_SOURCE_DIR}/.deps/googletest)
 if(EXISTS ${GOOGLETEST_SOURCE_DIR}/CMakeLists.txt)
     set(FETCHCONTENT_SOURCE_DIR_GOOGLETEST ${GOOGLETEST_SOURCE_DIR})

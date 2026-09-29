@@ -1,8 +1,6 @@
 add_library(formal INTERFACE)
 target_include_directories(formal INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
-# Listing the headers gives them entries in compile_commands.json and, with
-# CMAKE_VERIFY_INTERFACE_HEADER_SETS, a target that compiles each one alone.
 target_sources(
     formal
     INTERFACE

@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.25)
 
 project(formal LANGUAGES CXX)
 
-# GCC and Clang number their releases on different scales, so each gets its
-# own floor. An empty floor means the compiler is not supported at all.
 set(FORMAL_MINIMUM_VERSION "")
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(FORMAL_MINIMUM_VERSION 14)
