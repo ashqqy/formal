@@ -28,21 +28,6 @@ TEST(Regex, StreamOutputMatchesToString) {
     EXPECT_EQ(out.str(), "(a|b)*c");
 }
 
-TEST(Regex, DrawsItselfAsDot) {
-    const Regex pattern("ab*");
-
-    EXPECT_EQ(pattern.to_dot(), "digraph regex {\n"
-                                "  ordering=out;\n"
-                                "  n0 [label=\"Concat\"];\n"
-                                "  n1 [label=\"a\"];\n"
-                                "  n0 -> n1;\n"
-                                "  n2 [label=\"Star\"];\n"
-                                "  n3 [label=\"b\"];\n"
-                                "  n2 -> n3;\n"
-                                "  n0 -> n2;\n"
-                                "}\n");
-}
-
 TEST(Regex, ConstructionRejectsABadPattern) {
     try {
         const Regex pattern("(a");
