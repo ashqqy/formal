@@ -143,7 +143,6 @@ TEST(LexerAlphabet, RejectsSymbolsOutside) {
     }
 }
 
-// The alphabet holds the symbols of the language, not of the notation.
 TEST(LexerAlphabet, LeavesOperatorsAlone) {
     EXPECT_NO_THROW(tokenize("a|b", Alphabet::from_symbols("ab")));
     EXPECT_NO_THROW(tokenize("(a)*", Alphabet::from_symbols("a")));
@@ -194,7 +193,6 @@ TEST(LexerPeek, DoesNotConsume) {
 
 TEST(LexerPeek, SkipsWhitespaceLikeNext) {
     Lexer lexer(" \t a");
-    // Separate statements: argument order is unspecified.
     const Token letter(TokenType::Letter, 'a', at(1, 4, 3));
     EXPECT_EQ(lexer.peek(), letter);
     EXPECT_EQ(lexer.next(), letter);

@@ -53,7 +53,6 @@ TEST(SortedSet, ComparesByContentNotByOrderOfInsertion) {
     EXPECT_NE(made({1, 2}), SortedSet<int>{});
 }
 
-// Поля сравниваются в порядке объявления, значит сначала по first.
 TEST(SortedSet, OrdersCompoundValuesFieldByField) {
     const SortedSet<Pair> set = made<Pair>({{2, 0}, {1, 9}, {1, 4}});
     ASSERT_EQ(set.items().size(), 3U);

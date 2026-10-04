@@ -30,7 +30,6 @@ static_assert(name(TokenType::Letter) == "Letter");
 static_assert(name(TokenType::End) == "End");
 static_assert(name(static_cast<TokenType>(42)) == "<unknown>");
 
-// The names label the parameterised lexer tests, so spelling matters.
 TEST(TokenTypeName, NamesEveryTokenType) {
     EXPECT_EQ(name(TokenType::Pipe), "Pipe");
     EXPECT_EQ(name(TokenType::Star), "Star");
