@@ -10,12 +10,6 @@
 namespace formal::regex {
 namespace {
 
-std::string to_dot(const Node& root) {
-    DotPrinter printer;
-    root.accept(printer);
-    return std::move(printer).take();
-}
-
 TEST(Dot, DrawsASymbol) {
     EXPECT_EQ(to_dot(*make_symbol('a')), "digraph regex {\n"
                                          "  ordering=out;\n"

@@ -63,4 +63,10 @@ class DotPrinter final : public Visitor {
     std::size_t current_ = 0;
 };
 
+[[nodiscard]] constexpr std::string to_dot(const Node& root) {
+    DotPrinter printer;
+    root.accept(printer);
+    return std::move(printer).take();
+}
+
 } // namespace formal::regex
