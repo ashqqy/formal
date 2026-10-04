@@ -28,21 +28,30 @@ class Nfa {
         return state(id).transitions.items();
     }
 
+    [[nodiscard]] constexpr std::span<const StateId>
+    epsilons(StateId id) const {
+        return state(id).epsilons.items();
+    }
+
     [[nodiscard]] constexpr StateId add_state() {
         const StateId id = to_state_id(states_.size());
         states_.emplace_back();
         return id;
     }
     constexpr void add_transition(StateId from, Symbol symbol, StateId to) {
-        assert(from < size() && "Unknown source state");
         assert(to < size() && "Unknown target state");
-
         state(from).transitions.insert({.symbol = symbol, .target = to});
+    }
+
+    constexpr void add_epsilon(StateId from, StateId to) {
+        assert(to < size() && "Unknown target state");
+        state(from).epsilons.insert(to);
     }
 
   private:
     struct State {
         SortedSet<Transition> transitions;
+        SortedSet<StateId> epsilons;
     };
 
     [[nodiscard]] constexpr State& state(StateId id) {

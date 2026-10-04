@@ -104,5 +104,71 @@ TEST(NfaTransitions, AreSortedBySymbolThenTarget) {
     EXPECT_EQ(transitions[2], (Nfa::Transition{to_symbol('b'), 1}));
 }
 
+constexpr std::size_t epsilon_count(std::size_t how_many) {
+    Nfa nfa = two_states();
+    for (std::size_t i = 0; i < how_many; ++i) {
+        nfa.add_epsilon(0, 1);
+    }
+    return nfa.epsilons(0).size();
+}
+
+static_assert(epsilon_count(1) == 1);
+static_assert(epsilon_count(5) == 1);
+
+TEST(NfaEpsilons, StartEmpty) {
+    const Nfa nfa = two_states();
+    EXPECT_TRUE(nfa.epsilons(0).empty());
+    EXPECT_TRUE(nfa.epsilons(1).empty());
+}
+
+TEST(NfaEpsilons, BelongToTheSourceStateOnly) {
+    Nfa nfa = two_states();
+    nfa.add_epsilon(0, 1);
+
+    ASSERT_EQ(nfa.epsilons(0).size(), 1U);
+    EXPECT_EQ(nfa.epsilons(0)[0], StateId{1});
+    EXPECT_TRUE(nfa.epsilons(1).empty());
+}
+
+TEST(NfaEpsilons, IgnoreDuplicates) {
+    Nfa nfa = two_states();
+    nfa.add_epsilon(0, 1);
+    nfa.add_epsilon(0, 1);
+
+    EXPECT_EQ(nfa.epsilons(0).size(), 1U);
+}
+
+// Вложенные звёзды вроде (a*)* дают такую петлю сами.
+TEST(NfaEpsilons, AllowASelfLoop) {
+    Nfa nfa = two_states();
+    nfa.add_epsilon(0, 0);
+
+    ASSERT_EQ(nfa.epsilons(0).size(), 1U);
+    EXPECT_EQ(nfa.epsilons(0)[0], StateId{0});
+}
+
+TEST(NfaEpsilons, DoNotMixWithLabelledTransitions) {
+    Nfa nfa = two_states();
+    nfa.add_transition(0, to_symbol('a'), 1);
+    nfa.add_epsilon(0, 1);
+
+    EXPECT_EQ(nfa.transitions(0).size(), 1U);
+    EXPECT_EQ(nfa.epsilons(0).size(), 1U);
+}
+
+TEST(NfaEpsilons, AreSortedRegardlessOfInsertionOrder) {
+    Nfa nfa = two_states();
+    (void)nfa.add_state();
+    nfa.add_epsilon(0, 2);
+    nfa.add_epsilon(0, 0);
+    nfa.add_epsilon(0, 1);
+
+    const auto epsilons = nfa.epsilons(0);
+    ASSERT_EQ(epsilons.size(), 3U);
+    EXPECT_EQ(epsilons[0], StateId{0});
+    EXPECT_EQ(epsilons[1], StateId{1});
+    EXPECT_EQ(epsilons[2], StateId{2});
+}
+
 } // namespace
 } // namespace formal::automata
