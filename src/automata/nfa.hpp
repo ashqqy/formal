@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "automata/state.hpp"
+#include "util/alphabet.hpp"
 #include "util/sorted_set.hpp"
 #include "util/symbol.hpp"
 
@@ -22,12 +23,13 @@ class Nfa {
     [[nodiscard]] constexpr std::size_t size() const noexcept {
         return states_.size();
     }
-
+    [[nodiscard]] constexpr Alphabet alphabet() const noexcept {
+        return alphabet_;
+    }
     [[nodiscard]] constexpr std::span<const Transition>
     transitions(StateId id) const {
         return state(id).transitions.items();
     }
-
     [[nodiscard]] constexpr std::span<const StateId>
     epsilons(StateId id) const {
         return state(id).epsilons.items();
@@ -41,11 +43,14 @@ class Nfa {
     constexpr void add_transition(StateId from, Symbol symbol, StateId to) {
         assert(to < size() && "Unknown target state");
         state(from).transitions.insert({.symbol = symbol, .target = to});
+        alphabet_.add(symbol);
     }
-
     constexpr void add_epsilon(StateId from, StateId to) {
         assert(to < size() && "Unknown target state");
         state(from).epsilons.insert(to);
+    }
+    constexpr void widen_alphabet(const Alphabet& other) {
+        alphabet_.merge(other);
     }
 
   private:
@@ -64,6 +69,7 @@ class Nfa {
     }
 
     std::vector<State> states_;
+    Alphabet alphabet_;
 };
 
 } // namespace formal::automata

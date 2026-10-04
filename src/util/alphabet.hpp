@@ -45,6 +45,11 @@ class Alphabet {
     constexpr void add(Symbol symbol) noexcept {
         chunks_[chunk_of(symbol)] |= mask_of(symbol);
     }
+    constexpr void merge(const Alphabet& other) noexcept {
+        for (std::size_t i = 0; i < chunk_count; ++i) {
+            chunks_[i] |= other.chunks_[i];
+        }
+    }
     [[nodiscard]] constexpr bool contains(Symbol symbol) const noexcept {
         return (chunks_[chunk_of(symbol)] & mask_of(symbol)) != 0;
     }

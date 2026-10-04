@@ -37,6 +37,14 @@ static_assert(!dna.contains(to_symbol('B')));
 static_assert(digits.size() == 10);
 static_assert(everything.size() == 256);
 
+constexpr Alphabet merged() {
+    Alphabet alphabet = Alphabet::from_symbols("ab");
+    alphabet.merge(Alphabet::from_symbols("bc"));
+    return alphabet;
+}
+
+static_assert(merged() == Alphabet::from_symbols("abc"));
+
 TEST(Alphabet, StartsEmpty) {
     const Alphabet alphabet;
     EXPECT_FALSE(alphabet.contains(to_symbol('a')));
@@ -44,7 +52,6 @@ TEST(Alphabet, StartsEmpty) {
     EXPECT_FALSE(alphabet.contains(Symbol{255}));
 }
 
-// 'b' and 'A' sit in the same chunk as 'a'.
 TEST(Alphabet, HoldsOnlyWhatWasAdded) {
     const Alphabet alphabet = made({to_symbol('a')});
     EXPECT_TRUE(alphabet.contains(to_symbol('a')));
@@ -58,7 +65,6 @@ TEST(Alphabet, AddingTwiceChangesNothing) {
     EXPECT_EQ(alphabet, made({to_symbol('a')}));
 }
 
-// 'a' is bit 33 of chunk 1, 200 is bit 8 of chunk 3.
 TEST(Alphabet, KeepsChunksApart) {
     const Alphabet alphabet = made({to_symbol('a'), Symbol{200}});
     EXPECT_TRUE(alphabet.contains(to_symbol('a')));
@@ -102,7 +108,6 @@ TEST(AlphabetSize, CountsAcrossChunks) {
     EXPECT_EQ(alphabet.size(), 4U);
 }
 
-// Fills every chunk, so a chunk lost while summing shows up here.
 TEST(AlphabetSize, CountsEverySymbol) {
     Alphabet alphabet;
     for (int value = 0; value < 256; ++value) {
@@ -126,7 +131,6 @@ TEST(AlphabetFromSymbols, EmptyStringGivesAnEmptyAlphabet) {
     EXPECT_EQ(Alphabet::from_symbols(""), Alphabet{});
 }
 
-// Both bounds belong to the range: '0'..'9' is ten symbols, not nine.
 TEST(AlphabetFromRange, IncludesBothBounds) {
     EXPECT_EQ(digits.size(), 10U);
     EXPECT_TRUE(digits.contains(to_symbol('0')));
@@ -139,7 +143,6 @@ TEST(AlphabetFromRange, AcceptsASingleSymbol) {
     EXPECT_EQ(Alphabet::from_range(to_symbol('a'), to_symbol('a')).size(), 1U);
 }
 
-// The loop counter must outgrow Symbol, or 255 never ends it.
 TEST(AlphabetFromRange, ReachesTheLastSymbol) {
     EXPECT_EQ(Alphabet::from_range(Symbol{250}, Symbol{255}).size(), 6U);
     EXPECT_EQ(Alphabet::from_range(Symbol{0}, Symbol{255}), Alphabet::all());
@@ -155,6 +158,36 @@ TEST(AlphabetAll, HoldsEverySymbol) {
     EXPECT_TRUE(everything.contains(Symbol{0}));
     EXPECT_TRUE(everything.contains(Symbol{255}));
     EXPECT_NE(everything, Alphabet{});
+}
+
+TEST(AlphabetMerge, AddsSymbolsOfTheOther) {
+    Alphabet alphabet = Alphabet::from_symbols("ab");
+    alphabet.merge(Alphabet::from_symbols("cd"));
+
+    EXPECT_EQ(alphabet, Alphabet::from_symbols("abcd"));
+}
+
+TEST(AlphabetMerge, KeepsWhatWasAlreadyThere) {
+    Alphabet alphabet = Alphabet::from_symbols("ab");
+    alphabet.merge(Alphabet::from_symbols("bc"));
+
+    EXPECT_EQ(alphabet, Alphabet::from_symbols("abc"));
+}
+
+TEST(AlphabetMerge, WithAnEmptyAlphabetChangesNothing) {
+    Alphabet alphabet = Alphabet::from_symbols("ab");
+    alphabet.merge(Alphabet{});
+
+    EXPECT_EQ(alphabet, Alphabet::from_symbols("ab"));
+}
+
+TEST(AlphabetMerge, ReachesEveryChunk) {
+    Alphabet alphabet = Alphabet::from_symbols("a");
+    alphabet.merge(made({Symbol{0}, Symbol{200}, Symbol{255}}));
+
+    EXPECT_EQ(alphabet.size(), 4U);
+    EXPECT_TRUE(alphabet.contains(Symbol{0}));
+    EXPECT_TRUE(alphabet.contains(Symbol{255}));
 }
 
 } // namespace

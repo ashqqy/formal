@@ -4,6 +4,7 @@
 
 #include "automata/nfa.hpp"
 #include "automata/state.hpp"
+#include "util/alphabet.hpp"
 #include "util/symbol.hpp"
 
 namespace formal::automata {
@@ -90,7 +91,6 @@ TEST(NfaTransitions, KeepTheSameSymbolToDifferentTargets) {
     EXPECT_EQ(nfa.transitions(0).size(), 2U);
 }
 
-// Порядок полей в Transition задаёт порядок сравнения: сначала символ.
 TEST(NfaTransitions, AreSortedBySymbolThenTarget) {
     Nfa nfa = two_states();
     nfa.add_transition(0, to_symbol('b'), 1);
@@ -138,7 +138,6 @@ TEST(NfaEpsilons, IgnoreDuplicates) {
     EXPECT_EQ(nfa.epsilons(0).size(), 1U);
 }
 
-// Вложенные звёзды вроде (a*)* дают такую петлю сами.
 TEST(NfaEpsilons, AllowASelfLoop) {
     Nfa nfa = two_states();
     nfa.add_epsilon(0, 0);
@@ -168,6 +167,68 @@ TEST(NfaEpsilons, AreSortedRegardlessOfInsertionOrder) {
     EXPECT_EQ(epsilons[0], StateId{0});
     EXPECT_EQ(epsilons[1], StateId{1});
     EXPECT_EQ(epsilons[2], StateId{2});
+}
+
+constexpr Alphabet alphabet_of(Symbol symbol) {
+    Nfa nfa = two_states();
+    nfa.add_transition(0, symbol, 1);
+    return nfa.alphabet();
+}
+
+static_assert(Nfa{}.alphabet() == Alphabet{});
+static_assert(alphabet_of(to_symbol('a')) == Alphabet::from_symbols("a"));
+
+TEST(NfaAlphabet, StartsEmpty) {
+    EXPECT_EQ(Nfa{}.alphabet(), Alphabet{});
+}
+
+TEST(NfaAlphabet, GrowsWithEveryTransition) {
+    Nfa nfa = two_states();
+    nfa.add_transition(0, to_symbol('a'), 1);
+    nfa.add_transition(1, to_symbol('b'), 0);
+
+    EXPECT_EQ(nfa.alphabet(), Alphabet::from_symbols("ab"));
+}
+
+TEST(NfaAlphabet, CountsASymbolOnce) {
+    Nfa nfa = two_states();
+    nfa.add_transition(0, to_symbol('a'), 1);
+    nfa.add_transition(1, to_symbol('a'), 0);
+
+    EXPECT_EQ(nfa.alphabet().size(), 1U);
+}
+
+TEST(NfaAlphabet, IgnoresEpsilonTransitions) {
+    Nfa nfa = two_states();
+    nfa.add_epsilon(0, 1);
+
+    EXPECT_EQ(nfa.alphabet(), Alphabet{});
+}
+
+TEST(NfaAlphabet, WidensWithSymbolsThatHaveNoTransition) {
+    Nfa nfa = two_states();
+    nfa.add_transition(0, to_symbol('a'), 1);
+    nfa.widen_alphabet(Alphabet::from_symbols("bc"));
+
+    EXPECT_EQ(nfa.alphabet(), Alphabet::from_symbols("abc"));
+}
+
+TEST(NfaAlphabet, WideningKeepsTheSymbolsOfTransitions) {
+    Nfa nfa = two_states();
+    nfa.add_transition(0, to_symbol('a'), 1);
+    nfa.widen_alphabet(Alphabet{});
+
+    EXPECT_EQ(nfa.alphabet(), Alphabet::from_symbols("a"));
+}
+
+TEST(NfaAlphabet, HandsOutACopy) {
+    Nfa nfa = two_states();
+    nfa.add_transition(0, to_symbol('a'), 1);
+
+    Alphabet copy = nfa.alphabet();
+    copy.add(to_symbol('z'));
+
+    EXPECT_EQ(nfa.alphabet(), Alphabet::from_symbols("a"));
 }
 
 } // namespace
