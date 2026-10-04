@@ -23,6 +23,7 @@ target_sources(
                 util/alphabet.hpp
                 util/ascii.hpp
                 util/dot.hpp
+                util/sorted_set.hpp
                 util/symbol.hpp
                 util/symbol_print.hpp
 )

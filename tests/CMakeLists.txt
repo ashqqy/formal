@@ -24,6 +24,7 @@ add_executable(
     regex/lexer_test.cpp
     regex/token_test.cpp
     util/alphabet_test.cpp
+    util/sorted_set_test.cpp
 )
 target_link_libraries(
     formal_tests
