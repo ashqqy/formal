@@ -23,16 +23,19 @@ class Nfa {
     [[nodiscard]] constexpr std::size_t size() const noexcept {
         return states_.size();
     }
-    [[nodiscard]] constexpr Alphabet alphabet() const noexcept {
-        return alphabet_;
-    }
     [[nodiscard]] constexpr std::span<const Transition>
-    transitions(StateId id) const {
+    transitions(StateId id) const noexcept {
         return state(id).transitions.items();
     }
     [[nodiscard]] constexpr std::span<const StateId>
-    epsilons(StateId id) const {
+    epsilons(StateId id) const noexcept {
         return state(id).epsilons.items();
+    }
+    [[nodiscard]] constexpr std::span<const StateId> starts() const noexcept {
+        return starts_.items();
+    }
+    [[nodiscard]] constexpr Alphabet alphabet() const noexcept {
+        return alphabet_;
     }
 
     [[nodiscard]] constexpr StateId add_state() {
@@ -49,7 +52,11 @@ class Nfa {
         assert(to < size() && "Unknown target state");
         state(from).epsilons.insert(to);
     }
-    constexpr void widen_alphabet(const Alphabet& other) {
+    constexpr void add_start(StateId id) {
+        assert(id < size() && "Unknown state");
+        starts_.insert(id);
+    }
+    constexpr void widen_alphabet(const Alphabet& other) noexcept {
         alphabet_.merge(other);
     }
 
@@ -59,16 +66,17 @@ class Nfa {
         SortedSet<StateId> epsilons;
     };
 
-    [[nodiscard]] constexpr State& state(StateId id) {
+    [[nodiscard]] constexpr State& state(StateId id) noexcept {
         assert(id < size() && "Unknown state");
         return states_[id];
     }
-    [[nodiscard]] constexpr const State& state(StateId id) const {
+    [[nodiscard]] constexpr const State& state(StateId id) const noexcept {
         assert(id < size() && "Unknown state");
         return states_[id];
     }
 
     std::vector<State> states_;
+    SortedSet<StateId> starts_;
     Alphabet alphabet_;
 };
 

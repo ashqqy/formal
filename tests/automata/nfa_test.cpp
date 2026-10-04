@@ -231,5 +231,67 @@ TEST(NfaAlphabet, HandsOutACopy) {
     EXPECT_EQ(nfa.alphabet(), Alphabet::from_symbols("a"));
 }
 
+constexpr std::size_t start_count(std::size_t how_many) {
+    Nfa nfa = two_states();
+    for (std::size_t i = 0; i < how_many; ++i) {
+        nfa.add_start(0);
+    }
+    return nfa.starts().size();
+}
+
+static_assert(Nfa{}.starts().empty());
+static_assert(start_count(1) == 1);
+static_assert(start_count(5) == 1);
+
+TEST(NfaStarts, StartEmpty) {
+    EXPECT_TRUE(two_states().starts().empty());
+}
+
+TEST(NfaStarts, HoldWhatWasAdded) {
+    Nfa nfa = two_states();
+    nfa.add_start(1);
+
+    ASSERT_EQ(nfa.starts().size(), 1U);
+    EXPECT_EQ(nfa.starts()[0], StateId{1});
+}
+
+TEST(NfaStarts, IgnoreDuplicates) {
+    Nfa nfa = two_states();
+    nfa.add_start(0);
+    nfa.add_start(0);
+
+    EXPECT_EQ(nfa.starts().size(), 1U);
+}
+
+TEST(NfaStarts, AllowSeveralStates) {
+    Nfa nfa = two_states();
+    nfa.add_start(0);
+    nfa.add_start(1);
+
+    EXPECT_EQ(nfa.starts().size(), 2U);
+}
+
+TEST(NfaStarts, AreSortedRegardlessOfInsertionOrder) {
+    Nfa nfa = two_states();
+    (void)nfa.add_state();
+    nfa.add_start(2);
+    nfa.add_start(0);
+    nfa.add_start(1);
+
+    const auto starts = nfa.starts();
+    ASSERT_EQ(starts.size(), 3U);
+    EXPECT_EQ(starts[0], StateId{0});
+    EXPECT_EQ(starts[1], StateId{1});
+    EXPECT_EQ(starts[2], StateId{2});
+}
+
+TEST(NfaStarts, DoNotTouchTransitions) {
+    Nfa nfa = two_states();
+    nfa.add_start(0);
+
+    EXPECT_TRUE(nfa.transitions(0).empty());
+    EXPECT_TRUE(nfa.epsilons(0).empty());
+}
+
 } // namespace
 } // namespace formal::automata
