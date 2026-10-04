@@ -31,6 +31,9 @@ class Nfa {
     epsilons(StateId id) const noexcept {
         return state(id).epsilons.items();
     }
+    [[nodiscard]] constexpr bool is_accepting(StateId id) const noexcept {
+        return state(id).accepting;
+    }
     [[nodiscard]] constexpr std::span<const StateId> starts() const noexcept {
         return starts_.items();
     }
@@ -52,6 +55,9 @@ class Nfa {
         assert(to < size() && "Unknown target state");
         state(from).epsilons.insert(to);
     }
+    constexpr void set_accepting(StateId id, bool value = true) noexcept {
+        state(id).accepting = value;
+    }
     constexpr void add_start(StateId id) {
         assert(id < size() && "Unknown state");
         starts_.insert(id);
@@ -60,10 +66,15 @@ class Nfa {
         alphabet_.merge(other);
     }
 
+    bool operator==(const Nfa&) const = default;
+
   private:
     struct State {
         SortedSet<Transition> transitions;
         SortedSet<StateId> epsilons;
+        bool accepting = false;
+
+        bool operator==(const State&) const = default;
     };
 
     [[nodiscard]] constexpr State& state(StateId id) noexcept {

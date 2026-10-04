@@ -293,5 +293,143 @@ TEST(NfaStarts, DoNotTouchTransitions) {
     EXPECT_TRUE(nfa.epsilons(0).empty());
 }
 
+constexpr bool accepting_after_set(bool value) {
+    Nfa nfa = two_states();
+    nfa.set_accepting(0, value);
+    return nfa.is_accepting(0);
+}
+
+static_assert(!two_states().is_accepting(0));
+static_assert(accepting_after_set(true));
+static_assert(!accepting_after_set(false));
+
+TEST(NfaAccepting, StatesStartRejecting) {
+    const Nfa nfa = two_states();
+    EXPECT_FALSE(nfa.is_accepting(0));
+    EXPECT_FALSE(nfa.is_accepting(1));
+}
+
+TEST(NfaAccepting, MarksOnlyTheGivenState) {
+    Nfa nfa = two_states();
+    nfa.set_accepting(0);
+
+    EXPECT_TRUE(nfa.is_accepting(0));
+    EXPECT_FALSE(nfa.is_accepting(1));
+}
+
+TEST(NfaAccepting, MarkingTwiceChangesNothing) {
+    Nfa nfa = two_states();
+    nfa.set_accepting(0);
+    nfa.set_accepting(0);
+
+    EXPECT_TRUE(nfa.is_accepting(0));
+}
+
+TEST(NfaAccepting, CanBeUnmarked) {
+    Nfa nfa = two_states();
+    nfa.set_accepting(0);
+    nfa.set_accepting(0, false);
+
+    EXPECT_FALSE(nfa.is_accepting(0));
+}
+
+TEST(NfaAccepting, AllowSeveralStates) {
+    Nfa nfa = two_states();
+    nfa.set_accepting(0);
+    nfa.set_accepting(1);
+
+    EXPECT_TRUE(nfa.is_accepting(0));
+    EXPECT_TRUE(nfa.is_accepting(1));
+}
+
+TEST(NfaAccepting, DoesNotTouchTheRest) {
+    Nfa nfa = two_states();
+    nfa.add_transition(0, to_symbol('a'), 1);
+    nfa.add_epsilon(0, 1);
+    nfa.add_start(0);
+    nfa.set_accepting(0);
+
+    EXPECT_EQ(nfa.transitions(0).size(), 1U);
+    EXPECT_EQ(nfa.epsilons(0).size(), 1U);
+    EXPECT_EQ(nfa.starts().size(), 1U);
+    EXPECT_EQ(nfa.alphabet(), Alphabet::from_symbols("a"));
+}
+
+constexpr Nfa built_forwards() {
+    Nfa nfa = two_states();
+    nfa.add_transition(0, to_symbol('a'), 1);
+    nfa.add_transition(0, to_symbol('b'), 1);
+    nfa.add_epsilon(0, 1);
+    nfa.add_epsilon(0, 0);
+    nfa.add_start(0);
+    nfa.set_accepting(1);
+    return nfa;
+}
+
+constexpr Nfa built_backwards() {
+    Nfa nfa = two_states();
+    nfa.set_accepting(1);
+    nfa.add_start(0);
+    nfa.add_epsilon(0, 0);
+    nfa.add_epsilon(0, 1);
+    nfa.add_transition(0, to_symbol('b'), 1);
+    nfa.add_transition(0, to_symbol('a'), 1);
+    return nfa;
+}
+
+static_assert(Nfa{} == Nfa{});
+static_assert(built_forwards() == built_backwards());
+
+TEST(NfaEquality, EmptyAutomataAreEqual) {
+    EXPECT_EQ(Nfa{}, Nfa{});
+}
+
+TEST(NfaEquality, IgnoresTheOrderOfConstruction) {
+    EXPECT_EQ(built_forwards(), built_backwards());
+}
+
+TEST(NfaEquality, SeesADifferentStateCount) {
+    EXPECT_NE(two_states(), Nfa{});
+}
+
+TEST(NfaEquality, SeesADifferentTransition) {
+    Nfa one = two_states();
+    one.add_transition(0, to_symbol('a'), 1);
+    Nfa other = two_states();
+    other.add_transition(0, to_symbol('b'), 1);
+
+    EXPECT_NE(one, other);
+}
+
+TEST(NfaEquality, SeesADifferentEpsilon) {
+    Nfa one = two_states();
+    one.add_epsilon(0, 1);
+
+    EXPECT_NE(one, two_states());
+}
+
+TEST(NfaEquality, SeesADifferentStartState) {
+    Nfa one = two_states();
+    one.add_start(0);
+    Nfa other = two_states();
+    other.add_start(1);
+
+    EXPECT_NE(one, other);
+}
+
+TEST(NfaEquality, SeesADifferentAcceptingState) {
+    Nfa one = two_states();
+    one.set_accepting(0);
+
+    EXPECT_NE(one, two_states());
+}
+
+TEST(NfaEquality, SeesADifferentAlphabet) {
+    Nfa one = two_states();
+    one.widen_alphabet(Alphabet::from_symbols("z"));
+
+    EXPECT_NE(one, two_states());
+}
+
 } // namespace
 } // namespace formal::automata
