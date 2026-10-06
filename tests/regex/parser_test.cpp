@@ -13,12 +13,6 @@
 namespace formal::regex {
 namespace {
 
-constexpr std::string to_string(const Node& root) {
-    Printer printer;
-    root.accept(printer);
-    return std::move(printer).take();
-}
-
 
 constexpr std::string round_trip(std::string pattern) {
     return to_string(*parse(std::move(pattern)));

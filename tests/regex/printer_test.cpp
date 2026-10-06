@@ -9,12 +9,6 @@
 namespace formal::regex {
 namespace {
 
-constexpr std::string to_string(const Node& root) {
-    Printer printer;
-    root.accept(printer);
-    return std::move(printer).take();
-}
-
 
 TEST(Printer, PrintsASymbol) {
     EXPECT_EQ(to_string(*make_symbol('a')), "a");

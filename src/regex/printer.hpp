@@ -74,4 +74,10 @@ class Printer final : public Visitor {
     Precedence parent_precedence_ = Precedence::Union;
 };
 
+[[nodiscard]] constexpr std::string to_string(const Node& root) {
+    Printer printer;
+    root.accept(printer);
+    return std::move(printer).take();
+}
+
 } // namespace formal::regex

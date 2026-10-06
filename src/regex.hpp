@@ -19,9 +19,7 @@ class Regex {
         : root_(regex::parse(std::move(pattern), allowed)) {}
 
     [[nodiscard]] constexpr std::string to_string() const {
-        regex::Printer printer;
-        root_->accept(printer);
-        return std::move(printer).take();
+        return regex::to_string(*root_);
     }
 
   private:
