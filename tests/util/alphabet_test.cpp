@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <initializer_list>
 #include <stdexcept>
 
@@ -44,6 +45,30 @@ constexpr Alphabet merged() {
 }
 
 static_assert(merged() == Alphabet::from_symbols("abc"));
+
+static_assert(dna.index_of(to_symbol('A')) == 0);
+static_assert(dna.index_of(to_symbol('C')) == 1);
+static_assert(dna.index_of(to_symbol('G')) == 2);
+static_assert(dna.index_of(to_symbol('T')) == 3);
+static_assert(everything.index_of(Symbol{200}) == 200);
+
+constexpr bool indexes_agree_with_a_scan(const Alphabet& alphabet) {
+    std::size_t expected = 0;
+    for (std::size_t value = 0; value < 256; ++value) {
+        const Symbol symbol = static_cast<Symbol>(value);
+        if (!alphabet.contains(symbol)) { continue; }
+        if (alphabet.index_of(symbol) != expected) { return false; }
+        ++expected;
+    }
+    return expected == alphabet.size();
+}
+
+static_assert(indexes_agree_with_a_scan(dna));
+static_assert(indexes_agree_with_a_scan(digits));
+static_assert(indexes_agree_with_a_scan(everything));
+static_assert(indexes_agree_with_a_scan(
+    made({Symbol{0}, Symbol{63}, Symbol{64}, Symbol{65}, Symbol{127},
+          Symbol{128}, Symbol{191}, Symbol{192}, Symbol{255}})));
 
 TEST(Alphabet, StartsEmpty) {
     const Alphabet alphabet;
@@ -188,6 +213,65 @@ TEST(AlphabetMerge, ReachesEveryChunk) {
     EXPECT_EQ(alphabet.size(), 4U);
     EXPECT_TRUE(alphabet.contains(Symbol{0}));
     EXPECT_TRUE(alphabet.contains(Symbol{255}));
+}
+
+TEST(AlphabetIndexOf, NumbersSymbolsFromZero) {
+    EXPECT_EQ(dna.index_of(to_symbol('A')), 0U);
+    EXPECT_EQ(dna.index_of(to_symbol('C')), 1U);
+    EXPECT_EQ(dna.index_of(to_symbol('G')), 2U);
+    EXPECT_EQ(dna.index_of(to_symbol('T')), 3U);
+}
+
+TEST(AlphabetIndexOf, IsDenseOverARange) {
+    for (Symbol digit = to_symbol('0'); digit <= to_symbol('9'); ++digit) {
+        EXPECT_EQ(digits.index_of(digit),
+                  static_cast<std::size_t>(digit - to_symbol('0')));
+    }
+}
+
+TEST(AlphabetIndexOf, OverEverythingIsTheSymbolItself) {
+    for (std::size_t value = 0; value < 256; ++value) {
+        const Symbol symbol = static_cast<Symbol>(value);
+        EXPECT_EQ(everything.index_of(symbol), value);
+    }
+}
+
+TEST(AlphabetIndexOf, AgreesWithAnAscendingScan) {
+    EXPECT_TRUE(indexes_agree_with_a_scan(dna));
+    EXPECT_TRUE(indexes_agree_with_a_scan(digits));
+    EXPECT_TRUE(indexes_agree_with_a_scan(everything));
+    EXPECT_TRUE(indexes_agree_with_a_scan(Alphabet::from_symbols("zyx")));
+}
+
+TEST(AlphabetIndexOf, CrossesChunkBoundaries) {
+    const Alphabet alphabet = made({Symbol{63}, Symbol{64}, Symbol{255}});
+
+    EXPECT_EQ(alphabet.index_of(Symbol{63}), 0U);
+    EXPECT_EQ(alphabet.index_of(Symbol{64}), 1U);
+    EXPECT_EQ(alphabet.index_of(Symbol{255}), 2U);
+}
+
+TEST(AlphabetIndexOf, CountsFullChunksBelow) {
+    Alphabet alphabet = Alphabet::from_range(Symbol{0}, Symbol{127});
+    alphabet.add(Symbol{200});
+
+    EXPECT_EQ(alphabet.index_of(Symbol{200}), 128U);
+}
+
+TEST(AlphabetIndexOf, NumbersTheOnlySymbolZero) {
+    EXPECT_EQ(made({Symbol{255}}).index_of(Symbol{255}), 0U);
+    EXPECT_EQ(made({Symbol{0}}).index_of(Symbol{0}), 0U);
+}
+
+TEST(AlphabetIndexOf, NumbersTheLastSymbolJustBelowTheSize) {
+    EXPECT_EQ(dna.index_of(to_symbol('T')), dna.size() - 1);
+    EXPECT_EQ(digits.index_of(to_symbol('9')), digits.size() - 1);
+    EXPECT_EQ(everything.index_of(Symbol{255}), everything.size() - 1);
+}
+
+TEST(AlphabetIndexOf, IgnoresSymbolsAbove) {
+    const Alphabet alphabet = made({to_symbol('a'), to_symbol('b')});
+    EXPECT_EQ(alphabet.index_of(to_symbol('a')), 0U);
 }
 
 } // namespace

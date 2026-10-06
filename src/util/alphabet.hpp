@@ -2,6 +2,7 @@
 
 #include <array>
 #include <bit>
+#include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <limits>
@@ -59,6 +60,18 @@ class Alphabet {
             count += static_cast<std::size_t>(std::popcount(chunk));
         }
         return count;
+    }
+    [[nodiscard]] constexpr std::size_t index_of(Symbol symbol) const noexcept {
+        assert(contains(symbol));
+
+        std::size_t index = 0;
+        for (std::size_t i = 0; i < chunk_of(symbol); ++i) {
+            index += static_cast<std::size_t>(std::popcount(chunks_[i]));
+        }
+        index += static_cast<std::size_t>(
+            std::popcount(chunks_[chunk_of(symbol)] & (mask_of(symbol) - 1)));
+
+        return index;
     }
 
     bool operator==(const Alphabet&) const = default;
