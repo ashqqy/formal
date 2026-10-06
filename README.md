@@ -46,10 +46,16 @@ atom   := letter | '(' union ')'
 build/debug/examples/formal_print 'a|bc*'
 ```
 
-С флагом `--dot` он печатает дерево разбора в формате Graphviz:
+С флагом `--ast` он печатает дерево разбора в формате Graphviz:
 
 ```sh
-build/debug/examples/formal_print --dot 'a|bc*' | dot -Tsvg -o tree.svg
+build/debug/examples/formal_print --ast 'a|bc*' | dot -Tsvg -o tree.svg
+```
+
+С флагом `--nfa` — автомат, построенный по регулярке:
+
+```sh
+build/debug/examples/formal_print --nfa 'a|bc*' | dot -Tsvg -o nfa.svg
 ```
 
 Для просмотра картинки нужен установленный `graphviz`.

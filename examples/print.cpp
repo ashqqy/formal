@@ -1,36 +1,91 @@
 #include <cstddef>
+#include <exception>
 #include <iostream>
+#include <optional>
 #include <span>
 #include <string>
 #include <string_view>
 
+#include "automata/dot.hpp"
 #include "regex.hpp"
 #include "regex/dot.hpp"
 #include "regex/error.hpp"
 #include "regex/node.hpp"
 #include "regex/parser.hpp"
 #include "regex/position.hpp"
+#include "regex/thompson.hpp"
+#include "util/alphabet.hpp"
+
+using namespace formal;
+
+namespace {
+
+void usage(std::string_view program) {
+    std::cerr << "usage: " << program
+              << " [--ast|--nfa] [--alphabet SYMBOLS] <regex>\n";
+}
+
+struct Options {
+    std::string_view mode;
+    Alphabet alphabet = Alphabet::all();
+    std::string_view pattern;
+};
+
+std::optional<Options> parse_options(std::span<char*> args) {
+    Options options;
+    std::optional<std::string_view> pattern;
+
+    for (std::size_t i = 1; i < args.size(); ++i) {
+        const std::string_view arg = args[i];
+        if (arg == "--ast" || arg == "--nfa") {
+            options.mode = arg;
+        } else if (arg == "--alphabet") {
+            if (++i == args.size()) { return std::nullopt; }
+            options.alphabet = Alphabet::from_symbols(args[i]);
+        } else if (arg.starts_with("--") || pattern.has_value()) {
+            return std::nullopt;
+        } else {
+            pattern = arg;
+        }
+    }
+
+    if (!pattern.has_value()) { return std::nullopt; }
+    options.pattern = *pattern;
+    return options;
+}
+
+} // namespace
 
 int main(int argc, char** argv) {
     const std::span<char*> args(argv, static_cast<std::size_t>(argc));
-    const bool dot = args.size() == 3 && std::string_view(args[1]) == "--dot";
 
-    if (args.size() != 2 && !dot) {
-        std::cerr << "usage: " << args[0] << " [--dot] <regex>\n";
+    const std::optional<Options> options = parse_options(args);
+    if (!options.has_value()) {
+        usage(args[0]);
         return 2;
     }
 
+    const std::string pattern(options->pattern);
+
     try {
-        if (dot) {
-            const formal::regex::NodePtr tree = formal::regex::parse(args[2]);
-            std::cout << formal::regex::to_dot(*tree);
+        if (options->mode.empty()) {
+            std::cout << Regex(pattern, options->alphabet) << '\n';
         } else {
-            std::cout << formal::Regex(args[1]) << '\n';
+            const regex::NodePtr tree =
+                regex::parse(pattern, options->alphabet);
+            if (options->mode == "--ast") {
+                std::cout << to_dot(*tree);
+            } else {
+                std::cout << to_dot(to_nfa(*tree));
+            }
         }
-    } catch (const formal::regex::SyntaxError& error) {
-        const formal::regex::Position position = error.position();
+    } catch (const regex::SyntaxError& error) {
+        const regex::Position position = error.position();
         std::cerr << "error at " << position.line << ':' << position.column
                   << ": " << error.what() << '\n';
+        return 1;
+    } catch (const std::exception& error) {
+        std::cerr << "error: " << error.what() << '\n';
         return 1;
     }
 
