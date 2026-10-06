@@ -1,6 +1,12 @@
+#include <algorithm>
+#include <concepts>
 #include <cstddef>
 #include <initializer_list>
+#include <iterator>
+#include <ranges>
 #include <stdexcept>
+#include <type_traits>
+#include <vector>
 
 #include <gtest/gtest.h>
 
@@ -69,6 +75,45 @@ static_assert(indexes_agree_with_a_scan(everything));
 static_assert(indexes_agree_with_a_scan(
     made({Symbol{0}, Symbol{63}, Symbol{64}, Symbol{65}, Symbol{127},
           Symbol{128}, Symbol{191}, Symbol{192}, Symbol{255}})));
+
+static_assert(std::forward_iterator<Alphabet::Iterator>);
+static_assert(std::sentinel_for<Alphabet::Iterator, Alphabet::Iterator>);
+static_assert(std::ranges::forward_range<Alphabet>);
+static_assert(std::regular<Alphabet::Iterator>);
+static_assert(std::is_trivially_copyable_v<Alphabet::Iterator>);
+static_assert(
+    std::is_void_v<std::iterator_traits<Alphabet::Iterator>::pointer>);
+static_assert(std::same_as<std::iter_value_t<Alphabet::Iterator>, Symbol>);
+
+constexpr std::size_t walked(const Alphabet& alphabet) {
+    std::size_t count = 0;
+    for ([[maybe_unused]] const Symbol symbol : alphabet) {
+        ++count;
+    }
+    return count;
+}
+
+constexpr bool walk_is_ascending_and_dense(const Alphabet& alphabet) {
+    std::size_t position = 0;
+    Symbol previous = 0;
+    for (const Symbol symbol : alphabet) {
+        if (position != 0 && symbol <= previous) { return false; }
+        if (alphabet.index_of(symbol) != position) { return false; }
+        previous = symbol;
+        ++position;
+    }
+    return position == alphabet.size();
+}
+
+static_assert(walked(Alphabet{}) == 0);
+static_assert(walked(dna) == 4);
+static_assert(walked(digits) == 10);
+static_assert(walked(everything) == 256);
+static_assert(walk_is_ascending_and_dense(dna));
+static_assert(walk_is_ascending_and_dense(digits));
+static_assert(walk_is_ascending_and_dense(everything));
+static_assert(walk_is_ascending_and_dense(made({Symbol{0}, Symbol{63},
+                                                Symbol{64}, Symbol{255}})));
 
 TEST(Alphabet, StartsEmpty) {
     const Alphabet alphabet;
@@ -272,6 +317,87 @@ TEST(AlphabetIndexOf, NumbersTheLastSymbolJustBelowTheSize) {
 TEST(AlphabetIndexOf, IgnoresSymbolsAbove) {
     const Alphabet alphabet = made({to_symbol('a'), to_symbol('b')});
     EXPECT_EQ(alphabet.index_of(to_symbol('a')), 0U);
+}
+
+std::vector<Symbol> collected(const Alphabet& alphabet) {
+    return {alphabet.begin(), alphabet.end()};
+}
+
+TEST(AlphabetIterator, OverAnEmptyAlphabetStopsAtOnce) {
+    const Alphabet alphabet;
+    EXPECT_EQ(alphabet.begin(), alphabet.end());
+    EXPECT_TRUE(collected(alphabet).empty());
+}
+
+TEST(AlphabetIterator, VisitsEverySymbolInAscendingOrder) {
+    EXPECT_EQ(collected(dna),
+              (std::vector<Symbol>{to_symbol('A'), to_symbol('C'),
+                                   to_symbol('G'), to_symbol('T')}));
+}
+
+TEST(AlphabetIterator, DoesNotFollowTheOrderOfInsertion) {
+    EXPECT_EQ(collected(Alphabet::from_symbols("TGCA")), collected(dna));
+}
+
+TEST(AlphabetIterator, CrossesChunkBoundaries) {
+    const Alphabet alphabet = made({Symbol{63}, Symbol{64}, Symbol{255}});
+    EXPECT_EQ(collected(alphabet),
+              (std::vector<Symbol>{Symbol{63}, Symbol{64}, Symbol{255}}));
+}
+
+TEST(AlphabetIterator, ReachesBothEndsOfTheRange) {
+    const std::vector<Symbol> all = collected(everything);
+
+    ASSERT_EQ(all.size(), 256U);
+    EXPECT_EQ(all.front(), Symbol{0});
+    EXPECT_EQ(all.back(), Symbol{255});
+}
+
+TEST(AlphabetIterator, VisitsExactlySizeSymbols) {
+    EXPECT_EQ(collected(dna).size(), dna.size());
+    EXPECT_EQ(collected(digits).size(), digits.size());
+    EXPECT_EQ(collected(everything).size(), everything.size());
+    EXPECT_EQ(collected(Alphabet{}).size(), Alphabet{}.size());
+}
+
+TEST(AlphabetIterator, AgreesWithIndexOf) {
+    std::size_t position = 0;
+    for (const Symbol symbol : dna) {
+        EXPECT_EQ(dna.index_of(symbol), position);
+        ++position;
+    }
+    EXPECT_EQ(position, dna.size());
+}
+
+TEST(AlphabetIterator, StartsAtTheFirstSymbolNotAtZero) {
+    const Alphabet alphabet = made({Symbol{200}});
+    EXPECT_EQ(*alphabet.begin(), Symbol{200});
+}
+
+TEST(AlphabetIterator, PostfixIncrementReturnsTheOldPosition) {
+    const Alphabet alphabet = Alphabet::from_symbols("ab");
+    auto it = alphabet.begin();
+    const auto before = it++;
+
+    EXPECT_EQ(*before, to_symbol('a'));
+    EXPECT_EQ(*it, to_symbol('b'));
+}
+
+TEST(AlphabetIterator, SupportsSeveralPasses) {
+    const Alphabet alphabet = Alphabet::from_symbols("ab");
+    auto first = alphabet.begin();
+    auto second = first;
+    ++second;
+
+    EXPECT_EQ(*first, to_symbol('a'));
+    EXPECT_EQ(*second, to_symbol('b'));
+    EXPECT_EQ(collected(alphabet), collected(alphabet));
+}
+
+TEST(AlphabetIterator, WorksWithRangeAlgorithms) {
+    EXPECT_EQ(std::ranges::distance(dna), 4);
+    EXPECT_TRUE(std::ranges::contains(dna, to_symbol('G')));
+    EXPECT_FALSE(std::ranges::contains(dna, to_symbol('B')));
 }
 
 } // namespace

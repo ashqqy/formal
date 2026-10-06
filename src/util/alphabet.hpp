@@ -5,6 +5,7 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <iterator>
 #include <limits>
 #include <stdexcept>
 #include <string_view>
@@ -15,6 +16,48 @@ namespace formal {
 
 class Alphabet {
   public:
+    class Iterator {
+      public:
+        using iterator_concept = std::forward_iterator_tag;
+        using iterator_category = std::input_iterator_tag;
+        using value_type = Symbol;
+        using difference_type = std::ptrdiff_t;
+        using reference = Symbol;
+        using pointer = void;
+
+        Iterator() = default;
+        constexpr Iterator(const Alphabet* alphabet, std::size_t index) noexcept
+            : alphabet_(alphabet), index_(index) {
+            skip_unset();
+        }
+
+        [[nodiscard]] constexpr Symbol operator*() const noexcept {
+            return static_cast<Symbol>(index_);
+        }
+        constexpr Iterator& operator++() noexcept {
+            ++index_;
+            skip_unset();
+            return *this;
+        }
+        constexpr Iterator operator++(int) noexcept {
+            Iterator copy = *this;
+            ++(*this);
+            return copy;
+        }
+        bool operator==(const Iterator&) const = default;
+
+      private:
+        constexpr void skip_unset() noexcept {
+            while (index_ < symbol_count &&
+                   !alphabet_->contains(static_cast<Symbol>(index_))) {
+                ++index_;
+            }
+        }
+
+        const Alphabet* alphabet_ = nullptr;
+        std::size_t index_ = symbol_count;
+    };
+
     [[nodiscard]] static constexpr Alphabet
     from_symbols(std::string_view symbols) noexcept {
         Alphabet alphabet;
@@ -23,7 +66,6 @@ class Alphabet {
         }
         return alphabet;
     }
-
     [[nodiscard]] static constexpr Alphabet from_range(Symbol first,
                                                        Symbol last) {
         if (first > last) {
@@ -35,12 +77,18 @@ class Alphabet {
         }
         return alphabet;
     }
-
     [[nodiscard]] static constexpr Alphabet all() noexcept {
         static_assert(symbol_count % chunk_bits == 0);
         Alphabet alphabet;
         alphabet.chunks_.fill(~Chunk{0});
         return alphabet;
+    }
+
+    [[nodiscard]] constexpr Iterator begin() const noexcept {
+        return {this, 0};
+    }
+    [[nodiscard]] constexpr Iterator end() const noexcept {
+        return {this, symbol_count};
     }
 
     constexpr void add(Symbol symbol) noexcept {
@@ -89,7 +137,6 @@ class Alphabet {
     chunk_of(Symbol symbol) noexcept {
         return symbol / chunk_bits;
     }
-
     [[nodiscard]] static constexpr Chunk mask_of(Symbol symbol) noexcept {
         return Chunk{1} << (symbol % chunk_bits);
     }
