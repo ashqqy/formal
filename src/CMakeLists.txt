@@ -9,8 +9,10 @@ target_sources(
             FILES
                 automata/closure.hpp
                 automata/dot.hpp
+                automata/matches.hpp
                 automata/nfa.hpp
                 automata/state.hpp
+                automata/step.hpp
                 regex.hpp
                 regex/dot.hpp
                 regex/error.hpp

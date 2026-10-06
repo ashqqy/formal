@@ -18,7 +18,9 @@ add_executable(
     regex_test.cpp
     automata/closure_test.cpp
     automata/dot_test.cpp
+    automata/matches_test.cpp
     automata/nfa_test.cpp
+    automata/step_test.cpp
     regex/dot_test.cpp
     regex/node_test.cpp
     regex/parser_test.cpp

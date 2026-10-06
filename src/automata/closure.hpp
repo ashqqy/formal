@@ -12,6 +12,7 @@ namespace formal::automata {
 epsilon_closure(const Nfa& nfa, std::span<const StateId> states) {
     std::vector<bool> visited(nfa.size(), false);
     std::vector<StateId> stack;
+
     for (const StateId state : states) {
         if (!visited[state]) {
             visited[state] = true;
