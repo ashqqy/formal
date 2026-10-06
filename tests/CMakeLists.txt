@@ -23,6 +23,7 @@ add_executable(
     regex/parser_test.cpp
     regex/printer_test.cpp
     regex/lexer_test.cpp
+    regex/thompson_test.cpp
     regex/token_test.cpp
     util/alphabet_test.cpp
     util/sorted_set_test.cpp

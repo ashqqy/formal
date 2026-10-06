@@ -18,6 +18,7 @@ target_sources(
                 regex/parser.hpp
                 regex/position.hpp
                 regex/printer.hpp
+                regex/thompson.hpp
                 regex/token.hpp
                 regex/token_print.hpp
                 regex/visitor.hpp
