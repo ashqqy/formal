@@ -23,6 +23,11 @@ class Dfa {
         if (!alphabet_.contains(symbol)) { return kNoState; }
         return table_[cell_of(from, symbol)];
     }
+    [[nodiscard]] constexpr StateId start() const noexcept { return start_; }
+    [[nodiscard]] constexpr bool is_accepting(StateId id) const noexcept {
+        assert(id < state_count_);
+        return accepting_[id];
+    }
     [[nodiscard]] constexpr Alphabet alphabet() const noexcept {
         return alphabet_;
     }
@@ -30,6 +35,7 @@ class Dfa {
     constexpr StateId add_state() {
         assert(state_count_ < kNoState);
         table_.resize(table_.size() + alphabet_.size(), kNoState);
+        accepting_.push_back(false);
         return to_state_id(state_count_++);
     }
     constexpr void set_transition(StateId from, Symbol symbol,
@@ -39,6 +45,16 @@ class Dfa {
         assert(alphabet_.contains(symbol));
         table_[cell_of(from, symbol)] = to;
     }
+    constexpr void set_start(StateId id) noexcept {
+        assert(id < state_count_);
+        start_ = id;
+    }
+    constexpr void set_accepting(StateId id, bool value = true) noexcept {
+        assert(id < state_count_);
+        accepting_[id] = value;
+    }
+
+    bool operator==(const Dfa&) const = default;
 
   private:
     [[nodiscard]] constexpr std::size_t cell_of(StateId state,
@@ -46,9 +62,11 @@ class Dfa {
         return (state * alphabet_.size()) + alphabet_.index_of(symbol);
     }
 
+    Alphabet alphabet_;
     std::vector<StateId> table_; // size = |states| x |alphabet|
     std::size_t state_count_ = 0;
-    Alphabet alphabet_;
+    StateId start_ = kNoState;
+    std::vector<bool> accepting_;
 };
 
 } // namespace formal::automata

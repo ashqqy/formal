@@ -30,6 +30,20 @@ static_assert(built().transition(1, to_symbol('a')) == kNoState);
 static_assert(built().transition(0, to_symbol('z')) == kNoState);
 static_assert(built().alphabet() == two);
 
+constexpr Dfa marked() {
+    Dfa dfa = built();
+    dfa.set_start(0);
+    dfa.set_accepting(1);
+    return dfa;
+}
+
+static_assert(Dfa{two}.start() == kNoState);
+static_assert(marked().start() == 0);
+static_assert(!marked().is_accepting(0));
+static_assert(marked().is_accepting(1));
+static_assert(marked() == marked());
+static_assert(!(marked() == built()));
+
 TEST(Dfa, StartsWithoutStates) {
     const Dfa dfa(two);
     EXPECT_EQ(dfa.size(), 0U);
@@ -178,6 +192,150 @@ TEST(Dfa, HoldsTheWholeAlphabet) {
     EXPECT_EQ(dfa.transition(from, Symbol{0}), to);
     EXPECT_EQ(dfa.transition(from, Symbol{255}), to);
     EXPECT_EQ(dfa.transition(from, Symbol{128}), kNoState);
+}
+
+TEST(DfaStart, IsUnsetUntilItIsSet) {
+    Dfa dfa(two);
+    EXPECT_EQ(dfa.start(), kNoState);
+
+    const StateId state = dfa.add_state();
+    EXPECT_EQ(dfa.start(), kNoState);
+
+    dfa.set_start(state);
+    EXPECT_EQ(dfa.start(), state);
+}
+
+TEST(DfaStart, CanBeMoved) {
+    Dfa dfa(two);
+    const StateId first = dfa.add_state();
+    const StateId second = dfa.add_state();
+
+    dfa.set_start(first);
+    dfa.set_start(second);
+
+    EXPECT_EQ(dfa.start(), second);
+}
+
+TEST(DfaAccepting, ANewStateIsNotAccepting) {
+    Dfa dfa(two);
+    const StateId state = dfa.add_state();
+    EXPECT_FALSE(dfa.is_accepting(state));
+}
+
+TEST(DfaAccepting, IsMarkedByDefault) {
+    Dfa dfa(two);
+    const StateId state = dfa.add_state();
+    dfa.set_accepting(state);
+
+    EXPECT_TRUE(dfa.is_accepting(state));
+}
+
+TEST(DfaAccepting, CanBeCleared) {
+    Dfa dfa(two);
+    const StateId state = dfa.add_state();
+    dfa.set_accepting(state);
+    dfa.set_accepting(state, false);
+
+    EXPECT_FALSE(dfa.is_accepting(state));
+}
+
+TEST(DfaAccepting, IsIndependentOfTheStart) {
+    Dfa dfa(two);
+    const StateId first = dfa.add_state();
+    const StateId second = dfa.add_state();
+    dfa.set_start(first);
+    dfa.set_accepting(second);
+
+    EXPECT_FALSE(dfa.is_accepting(first));
+    EXPECT_TRUE(dfa.is_accepting(second));
+}
+
+TEST(DfaAccepting, GrowsWithTheStates) {
+    Dfa dfa(two);
+    for (std::size_t i = 0; i < 5; ++i) {
+        const StateId state = dfa.add_state();
+        EXPECT_FALSE(dfa.is_accepting(state));
+    }
+
+    dfa.set_accepting(4);
+    EXPECT_TRUE(dfa.is_accepting(4));
+    EXPECT_FALSE(dfa.is_accepting(3));
+}
+
+TEST(DfaAccepting, KeepsStatesApart) {
+    Dfa dfa(two);
+    const StateId first = dfa.add_state();
+    const StateId second = dfa.add_state();
+    dfa.set_accepting(first);
+
+    EXPECT_TRUE(dfa.is_accepting(first));
+    EXPECT_FALSE(dfa.is_accepting(second));
+}
+
+TEST(DfaEquality, ComparesEqualToItself) {
+    const Dfa dfa = marked();
+    EXPECT_EQ(dfa, dfa);
+    EXPECT_EQ(marked(), marked());
+}
+
+TEST(DfaEquality, IgnoresTheOrderOfCalls) {
+    Dfa first(two);
+    (void)first.add_state();
+    (void)first.add_state();
+    first.set_accepting(1);
+    first.set_transition(0, to_symbol('a'), 1);
+    first.set_start(0);
+
+    Dfa second(two);
+    (void)second.add_state();
+    (void)second.add_state();
+    second.set_start(0);
+    second.set_transition(0, to_symbol('a'), 1);
+    second.set_accepting(1);
+
+    EXPECT_EQ(first, second);
+}
+
+TEST(DfaEquality, NoticesADifferentAlphabet) {
+    EXPECT_NE(Dfa{Alphabet::from_symbols("a")},
+              Dfa{Alphabet::from_symbols("b")});
+}
+
+TEST(DfaEquality, NoticesADifferentStateCount) {
+    Dfa one(two);
+    (void)one.add_state();
+
+    Dfa other(two);
+    (void)other.add_state();
+    (void)other.add_state();
+
+    EXPECT_NE(one, other);
+}
+
+TEST(DfaEquality, NoticesADifferentTransition) {
+    Dfa one = built();
+    Dfa other = built();
+    other.set_transition(0, to_symbol('a'), 0);
+
+    EXPECT_NE(one, other);
+}
+
+TEST(DfaEquality, NoticesADifferentStart) {
+    Dfa one = built();
+    Dfa other = built();
+    one.set_start(0);
+    other.set_start(1);
+
+    EXPECT_NE(one, other);
+}
+
+TEST(DfaEquality, NoticesADifferentAcceptingSet) {
+    Dfa one = built();
+    Dfa other = built();
+    one.set_accepting(0);
+    other.set_accepting(1);
+
+    EXPECT_NE(one, other);
 }
 
 } // namespace
