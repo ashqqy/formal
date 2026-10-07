@@ -48,14 +48,14 @@ class Alphabet {
 
       private:
         constexpr void skip_unset() noexcept {
-            while (index_ < symbol_count &&
+            while (index_ < kSymbolCount &&
                    !alphabet_->contains(static_cast<Symbol>(index_))) {
                 ++index_;
             }
         }
 
         const Alphabet* alphabet_ = nullptr;
-        std::size_t index_ = symbol_count;
+        std::size_t index_ = kSymbolCount;
     };
 
     [[nodiscard]] static constexpr Alphabet
@@ -78,7 +78,7 @@ class Alphabet {
         return alphabet;
     }
     [[nodiscard]] static constexpr Alphabet all() noexcept {
-        static_assert(symbol_count % chunk_bits == 0);
+        static_assert(kSymbolCount % kChunkBits == 0);
         Alphabet alphabet;
         alphabet.chunks_.fill(~Chunk{0});
         return alphabet;
@@ -88,14 +88,14 @@ class Alphabet {
         return {this, 0};
     }
     [[nodiscard]] constexpr Iterator end() const noexcept {
-        return {this, symbol_count};
+        return {this, kSymbolCount};
     }
 
     constexpr void add(Symbol symbol) noexcept {
         chunks_[chunk_of(symbol)] |= mask_of(symbol);
     }
     constexpr void merge(const Alphabet& other) noexcept {
-        for (std::size_t i = 0; i < chunk_count; ++i) {
+        for (std::size_t i = 0; i < kChunkCount; ++i) {
             chunks_[i] |= other.chunks_[i];
         }
     }
@@ -126,22 +126,22 @@ class Alphabet {
 
   private:
     using Chunk = std::uint64_t;
-    static constexpr std::size_t chunk_bits =
+    static constexpr std::size_t kChunkBits =
         std::numeric_limits<Chunk>::digits;
-    static constexpr std::size_t symbol_count =
+    static constexpr std::size_t kSymbolCount =
         std::numeric_limits<Symbol>::max() + 1;
-    static constexpr std::size_t chunk_count =
-        (symbol_count + chunk_bits - 1) / chunk_bits;
+    static constexpr std::size_t kChunkCount =
+        (kSymbolCount + kChunkBits - 1) / kChunkBits;
 
     [[nodiscard]] static constexpr std::size_t
     chunk_of(Symbol symbol) noexcept {
-        return symbol / chunk_bits;
+        return symbol / kChunkBits;
     }
     [[nodiscard]] static constexpr Chunk mask_of(Symbol symbol) noexcept {
-        return Chunk{1} << (symbol % chunk_bits);
+        return Chunk{1} << (symbol % kChunkBits);
     }
 
-    std::array<Chunk, chunk_count> chunks_{};
+    std::array<Chunk, kChunkCount> chunks_{};
 };
 
 } // namespace formal
