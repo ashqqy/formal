@@ -8,6 +8,8 @@ target_sources(
             BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
             FILES
                 automata/closure.hpp
+                automata/complete.hpp
+                automata/determinize.hpp
                 automata/dfa.hpp
                 automata/dot.hpp
                 automata/matches.hpp
