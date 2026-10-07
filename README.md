@@ -58,6 +58,18 @@ build/debug/examples/formal_print --ast 'a|bc*' | dot -Tsvg -o tree.svg
 build/debug/examples/formal_print --nfa 'a|bc*' | dot -Tsvg -o nfa.svg
 ```
 
+С флагом `--dfa` — он же после детерминизации:
+
+```sh
+build/debug/examples/formal_print --dfa 'a|bc*' | dot -Tsvg -o dfa.svg
+```
+
+С флагом `--complete` — он же после пополнения стоком:
+
+```sh
+build/debug/examples/formal_print --complete 'a|bc*' | dot -Tsvg -o complete.svg
+```
+
 Для просмотра картинки нужен установленный `graphviz`.
 
 ## Сборка и тесты

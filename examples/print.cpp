@@ -6,7 +6,11 @@
 #include <string>
 #include <string_view>
 
+#include "automata/complete.hpp"
+#include "automata/determinize.hpp"
+#include "automata/dfa.hpp"
 #include "automata/dot.hpp"
+#include "automata/nfa.hpp"
 #include "regex.hpp"
 #include "regex/dot.hpp"
 #include "regex/error.hpp"
@@ -22,7 +26,8 @@ namespace {
 
 void usage(std::string_view program) {
     std::cerr << "usage: " << program
-              << " [--ast|--nfa] [--alphabet SYMBOLS] <regex>\n";
+              << " [--ast|--nfa|--dfa|--complete] [--alphabet SYMBOLS]"
+                 " <regex>\n";
 }
 
 struct Options {
@@ -37,7 +42,8 @@ std::optional<Options> parse_options(std::span<char*> args) {
 
     for (std::size_t i = 1; i < args.size(); ++i) {
         const std::string_view arg = args[i];
-        if (arg == "--ast" || arg == "--nfa") {
+        if (arg == "--ast" || arg == "--nfa" || arg == "--dfa" ||
+            arg == "--complete") {
             options.mode = arg;
         } else if (arg == "--alphabet") {
             if (++i == args.size()) { return std::nullopt; }
@@ -76,7 +82,17 @@ int main(int argc, char** argv) {
             if (options->mode == "--ast") {
                 std::cout << to_dot(*tree);
             } else {
-                std::cout << to_dot(to_nfa(*tree));
+                const automata::Nfa nfa = to_nfa(*tree);
+                if (options->mode == "--nfa") {
+                    std::cout << to_dot(nfa);
+                } else {
+                    const automata::Dfa dfa = determinize(nfa);
+                    if (options->mode == "--dfa") {
+                        std::cout << to_dot(dfa);
+                    } else {
+                        std::cout << to_dot(complete(dfa));
+                    }
+                }
             }
         }
     } catch (const regex::SyntaxError& error) {
