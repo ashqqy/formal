@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "automata/closure.hpp"
+#include "automata/dfa.hpp"
 #include "automata/nfa.hpp"
 #include "automata/state.hpp"
 #include "automata/step.hpp"
@@ -23,6 +24,18 @@ namespace formal::automata {
     return std::ranges::any_of(current, [&nfa](const StateId state) {
         return nfa.is_accepting(state);
     });
+}
+
+[[nodiscard]] constexpr bool matches(const Dfa& dfa, std::string_view input) {
+    StateId current = dfa.start();
+    if (current == kNoState) { return false; }
+
+    for (const char c : input) {
+        current = dfa.transition(current, to_symbol(c));
+        if (current == kNoState) { return false; }
+    }
+
+    return dfa.is_accepting(current);
 }
 
 } // namespace formal::automata

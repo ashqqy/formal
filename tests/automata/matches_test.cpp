@@ -4,11 +4,13 @@
 
 #include <gtest/gtest.h>
 
+#include "automata/dfa.hpp"
 #include "automata/matches.hpp"
 #include "automata/nfa.hpp"
 #include "automata/state.hpp"
 #include "regex/parser.hpp"
 #include "regex/thompson.hpp"
+#include "util/alphabet.hpp"
 #include "util/symbol.hpp"
 
 namespace formal::automata {
@@ -173,6 +175,131 @@ TEST(MatchesNfa, TakesAnEmbeddedZero) {
 
     EXPECT_TRUE(matches(nfa, std::string_view("\0", 1)));
     EXPECT_FALSE(matches(nfa, ""));
+}
+
+constexpr Dfa star_of_a() {
+    Dfa dfa{Alphabet::from_symbols("a")};
+    const StateId only = dfa.add_state();
+    dfa.set_start(only);
+    dfa.set_accepting(only);
+    dfa.set_transition(only, to_symbol('a'), only);
+    return dfa;
+}
+
+constexpr Dfa literal_ab() {
+    Dfa dfa{Alphabet::from_symbols("ab")};
+    const StateId start = dfa.add_state();
+    const StateId after_a = dfa.add_state();
+    const StateId after_b = dfa.add_state();
+    dfa.set_start(start);
+    dfa.set_accepting(after_b);
+    dfa.set_transition(start, to_symbol('a'), after_a);
+    dfa.set_transition(after_a, to_symbol('b'), after_b);
+    return dfa;
+}
+
+constexpr Dfa a_or_b_c_star() {
+    Dfa dfa{Alphabet::from_symbols("abc")};
+    const StateId start = dfa.add_state();
+    const StateId after_a = dfa.add_state();
+    const StateId after_b = dfa.add_state();
+    dfa.set_start(start);
+    dfa.set_accepting(after_a);
+    dfa.set_accepting(after_b);
+    dfa.set_transition(start, to_symbol('a'), after_a);
+    dfa.set_transition(start, to_symbol('b'), after_b);
+    dfa.set_transition(after_b, to_symbol('c'), after_b);
+    return dfa;
+}
+
+static_assert(matches(star_of_a(), ""));
+static_assert(matches(star_of_a(), "aaa"));
+static_assert(!matches(star_of_a(), "b"));
+static_assert(matches(literal_ab(), "ab"));
+static_assert(!matches(literal_ab(), "a"));
+static_assert(!matches(literal_ab(), "abb"));
+static_assert(matches(a_or_b_c_star(), "bcc"));
+
+TEST(MatchesDfa, TakesTheEmptyStringWhenTheStartAccepts) {
+    EXPECT_TRUE(matches(star_of_a(), ""));
+    EXPECT_FALSE(matches(literal_ab(), ""));
+}
+
+TEST(MatchesDfa, FollowsASelfLoop) {
+    EXPECT_TRUE(matches(star_of_a(), "a"));
+    EXPECT_TRUE(matches(star_of_a(), std::string(1000, 'a')));
+}
+
+TEST(MatchesDfa, WantsTheWholeInput) {
+    EXPECT_TRUE(matches(literal_ab(), "ab"));
+    EXPECT_FALSE(matches(literal_ab(), "a"));
+    EXPECT_FALSE(matches(literal_ab(), "abb"));
+    EXPECT_FALSE(matches(literal_ab(), "b"));
+}
+
+TEST(MatchesDfa, WithoutAStartAcceptsNothing) {
+    Dfa dfa{Alphabet::from_symbols("a")};
+    const StateId state = dfa.add_state();
+    dfa.set_accepting(state);
+
+    EXPECT_FALSE(matches(dfa, ""));
+    EXPECT_FALSE(matches(dfa, "a"));
+}
+
+TEST(MatchesDfa, WithoutStatesAcceptsNothing) {
+    const Dfa dfa{Alphabet::from_symbols("a")};
+    EXPECT_FALSE(matches(dfa, ""));
+    EXPECT_FALSE(matches(dfa, "a"));
+}
+
+TEST(MatchesDfa, StopsOnAHole) {
+    EXPECT_FALSE(matches(literal_ab(), "aa"));
+    EXPECT_FALSE(matches(literal_ab(), "ba"));
+}
+
+TEST(MatchesDfa, StopsOnASymbolOutsideTheAlphabet) {
+    EXPECT_FALSE(matches(star_of_a(), "z"));
+    EXPECT_FALSE(matches(star_of_a(), "az"));
+    EXPECT_FALSE(matches(star_of_a(), "za"));
+    EXPECT_FALSE(matches(a_or_b_c_star(), "bcz"));
+}
+
+TEST(MatchesDfa, HandlesSymbolsAboveAscii) {
+    const char high = static_cast<char>(200);
+
+    Dfa dfa{Alphabet::from_symbols(std::string(1, high))};
+    const StateId start = dfa.add_state();
+    const StateId accept = dfa.add_state();
+    dfa.set_start(start);
+    dfa.set_accepting(accept);
+    dfa.set_transition(start, to_symbol(high), accept);
+
+    EXPECT_TRUE(matches(dfa, std::string(1, high)));
+    EXPECT_FALSE(matches(dfa, "a"));
+}
+
+TEST(MatchesDfa, TakesAnEmbeddedZero) {
+    Dfa dfa{Alphabet::from_symbols(std::string_view("\0", 1))};
+    const StateId start = dfa.add_state();
+    const StateId accept = dfa.add_state();
+    dfa.set_start(start);
+    dfa.set_accepting(accept);
+    dfa.set_transition(start, Symbol{0}, accept);
+
+    EXPECT_TRUE(matches(dfa, std::string_view("\0", 1)));
+    EXPECT_FALSE(matches(dfa, ""));
+}
+
+TEST(MatchesDfa, AgreesWithAnEquivalentNfa) {
+    const Nfa nfa = regex::to_nfa(*regex::parse("a|bc*"));
+    const Dfa dfa = a_or_b_c_star();
+
+    for (const std::string_view input :
+         {"", "a", "b", "c", "aa", "ab", "ba", "bc", "bcc", "bccc", "cb", "abc",
+          "bca", "z", "bcz"}) {
+        EXPECT_EQ(matches(dfa, input), matches(nfa, input))
+            << "input \"" << input << '"';
+    }
 }
 
 } // namespace
