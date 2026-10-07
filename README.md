@@ -70,6 +70,12 @@ build/debug/examples/formal_print --dfa 'a|bc*' | dot -Tsvg -o dfa.svg
 build/debug/examples/formal_print --complete 'a|bc*' | dot -Tsvg -o complete.svg
 ```
 
+С флагом `--min` — он же после минимизации:
+
+```sh
+build/debug/examples/formal_print --min 'a|bc*' | dot -Tsvg -o min.svg
+```
+
 Для просмотра картинки нужен установленный `graphviz`.
 
 ## Сборка и тесты

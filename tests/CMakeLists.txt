@@ -22,6 +22,7 @@ add_executable(
     automata/dfa_test.cpp
     automata/dot_test.cpp
     automata/matches_test.cpp
+    automata/minimize_test.cpp
     automata/nfa_test.cpp
     automata/step_test.cpp
     regex/dot_test.cpp

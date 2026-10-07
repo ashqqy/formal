@@ -13,6 +13,7 @@ target_sources(
                 automata/dfa.hpp
                 automata/dot.hpp
                 automata/matches.hpp
+                automata/minimize.hpp
                 automata/nfa.hpp
                 automata/state.hpp
                 automata/step.hpp

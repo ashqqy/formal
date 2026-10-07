@@ -10,6 +10,7 @@
 #include "automata/determinize.hpp"
 #include "automata/dfa.hpp"
 #include "automata/dot.hpp"
+#include "automata/minimize.hpp"
 #include "automata/nfa.hpp"
 #include "regex.hpp"
 #include "regex/dot.hpp"
@@ -26,7 +27,7 @@ namespace {
 
 void usage(std::string_view program) {
     std::cerr << "usage: " << program
-              << " [--ast|--nfa|--dfa|--complete] [--alphabet SYMBOLS]"
+              << " [--ast|--nfa|--dfa|--complete|--min] [--alphabet SYMBOLS]"
                  " <regex>\n";
 }
 
@@ -43,7 +44,7 @@ std::optional<Options> parse_options(std::span<char*> args) {
     for (std::size_t i = 1; i < args.size(); ++i) {
         const std::string_view arg = args[i];
         if (arg == "--ast" || arg == "--nfa" || arg == "--dfa" ||
-            arg == "--complete") {
+            arg == "--complete" || arg == "--min") {
             options.mode = arg;
         } else if (arg == "--alphabet") {
             if (++i == args.size()) { return std::nullopt; }
@@ -89,8 +90,10 @@ int main(int argc, char** argv) {
                     const automata::Dfa dfa = determinize(nfa);
                     if (options->mode == "--dfa") {
                         std::cout << to_dot(dfa);
-                    } else {
+                    } else if (options->mode == "--complete") {
                         std::cout << to_dot(complete(dfa));
+                    } else {
+                        std::cout << to_dot(minimize(dfa));
                     }
                 }
             }
