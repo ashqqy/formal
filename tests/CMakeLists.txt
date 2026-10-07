@@ -17,6 +17,7 @@ add_executable(
     formal_tests
     regex_test.cpp
     automata/closure_test.cpp
+    automata/dfa_test.cpp
     automata/dot_test.cpp
     automata/matches_test.cpp
     automata/nfa_test.cpp
